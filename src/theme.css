@@ -1,0 +1,48 @@
+/* Just Voice - Monochrome Minimal Theme */
+:root {
+  /* Background Colors */
+  --color-bg-primary: #000000;           /* Main background - Pure black */
+  --color-bg-secondary: #0A0A0A;         /* Secondary background */
+  --color-bg-card: #171717;              /* Card background (neutral-900) */
+  --color-bg-card-hover: #262626;        /* Card hover (neutral-800) */
+  --color-bg-elevated: #404040;          /* Elevated elements (neutral-700) */
+  --color-bg-input: #000000;             /* Input background - Pure black */
+
+  /* Text Colors */
+  --color-text-primary: #FFFFFF;         /* Primary text - White */
+  --color-text-secondary: #E5E5E5;       /* Secondary text */
+  --color-text-tertiary: #A3A3A3;        /* Tertiary text (neutral-400) */
+  --color-text-muted: #737373;           /* Muted text (neutral-500) */
+  --color-text-inverse: #000000;         /* Text on white background */
+
+  /* Border Colors */
+  --color-border: #262626;               /* Primary border (neutral-800) */
+  --color-border-light: #404040;         /* Light border (neutral-700) */
+  --color-border-focus: #FFFFFF;         /* Focus border - White */
+
+  /* Button Colors */
+  --color-btn-primary: #FFFFFF;          /* Primary button bg - White */
+  --color-btn-primary-hover: #E5E5E5;    /* Primary button hover (neutral-200) */
+  --color-btn-primary-text: #000000;     /* Primary button text - Black */
+
+  --color-btn-secondary: #404040;        /* Secondary button bg (neutral-700) */
+  --color-btn-secondary-hover: #525252;  /* Secondary button hover (neutral-600) */
+  --color-btn-secondary-text: #FFFFFF;   /* Secondary button text - White */
+
+  /* Accent & Active States */
+  --color-accent-primary: #FFFFFF;       /* Primary accent - White */
+  --color-accent-subtle: rgba(255, 255, 255, 0.05);  /* Subtle accent bg */
+  --color-accent-hover: rgba(255, 255, 255, 0.1);    /* Hover accent bg */
+
+  /* Special States */
+  --color-active-indicator: #FFFFFF;     /* Active state indicator */
+  --color-inactive: #737373;             /* Inactive state (neutral-500) */
+
+  /* Shadows */
+  --shadow-primary: rgba(255, 255, 255, 0.2);  /* White shadow */
+  --shadow-subtle: rgba(255, 255, 255, 0.05);   /* Subtle shadow */
+
+  /* Waveform Colors */
+  --color-wave-bg: #525252;              /* Waveform background (neutral-600) */
+  --color-wave-progress: #FFFFFF;        /* Waveform progress - White */
+}
