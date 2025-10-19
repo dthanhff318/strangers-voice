@@ -19,11 +19,14 @@ export function AudioRecorder({ onUploadSuccess }: AudioRecorderProps) {
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -174,6 +177,38 @@ export function AudioRecorder({ onUploadSuccess }: AudioRecorderProps) {
     setRecordingTime(0);
     setTitle("");
     setDescription("");
+    setIsPlaying(false);
+    setCurrentTime(0);
+  };
+
+  const togglePlayPause = () => {
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = parseFloat(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  const handleAudioEnded = () => {
+    setIsPlaying(false);
+    setCurrentTime(0);
   };
 
   const formatTime = (seconds: number) => {
@@ -196,36 +231,36 @@ export function AudioRecorder({ onUploadSuccess }: AudioRecorderProps) {
         {!isRecording && !audioBlob && (
           <button
             onClick={startRecording}
-            className="w-full bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] font-semibold py-4 px-6 rounded-xl transition duration-200 flex items-center justify-center gap-3 shadow-lg shadow-[var(--shadow-primary)]"
+            className="w-full bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md shadow-[var(--shadow-primary)] hover:scale-[1.02]"
           >
-            <span className="text-2xl">🎙️</span>
-            <span>Start Recording</span>
+            <span className="text-xl">🎙️</span>
+            <span className="text-sm">Start Recording</span>
           </button>
         )}
 
         {isRecording && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-center gap-3 bg-[var(--color-bg-card-hover)] py-6 rounded-xl border border-[var(--color-border)]">
+          <div className="space-y-3">
+            <div className="flex items-center justify-center gap-2.5 bg-[var(--color-bg-card-hover)] py-5 rounded-lg border border-[var(--color-border)] shadow-sm">
               <div
-                className={`w-3 h-3 rounded-full ${
+                className={`w-2.5 h-2.5 rounded-full ${
                   isPaused ? "bg-[var(--color-inactive)]" : "bg-[var(--color-active-indicator)] animate-pulse"
                 }`}
               />
-              <span className="text-3xl font-mono font-bold text-[var(--color-text-primary)]">
+              <span className="text-2xl font-mono font-bold text-[var(--color-text-primary)]">
                 {formatTime(recordingTime)}
               </span>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={pauseRecording}
-                className="flex-1 bg-[var(--color-bg-card-hover)] border-2 border-[var(--color-btn-primary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] font-semibold py-3 px-4 rounded-xl transition duration-200"
+                className="flex-1 bg-[var(--color-bg-card-hover)] border border-[var(--color-btn-primary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] font-semibold py-2.5 px-3 rounded-lg transition duration-200 text-sm"
               >
                 {isPaused ? "▶️ Resume" : "⏸️ Pause"}
               </button>
               <button
                 onClick={stopRecording}
-                className="flex-1 bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] font-semibold py-3 px-4 rounded-xl transition duration-200 border border-[var(--color-border)]"
+                className="flex-1 bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] font-semibold py-2.5 px-3 rounded-lg transition duration-200 border border-[var(--color-border)] text-sm"
               >
                 ⏹️ Stop
               </button>
@@ -235,54 +270,140 @@ export function AudioRecorder({ onUploadSuccess }: AudioRecorderProps) {
 
         {audioBlob && audioUrl && (
           <div className="space-y-4">
-            <div className="bg-[var(--color-bg-primary)] p-4 rounded-xl border border-[var(--color-border)]">
-              <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-3">
-                Preview your recording:
-              </p>
-              <audio controls src={audioUrl} className="w-full mb-3" />
-              <p className="text-xs text-[var(--color-text-tertiary)]">
-                Duration: {formatTime(Math.floor(duration || recordingTime))}
-              </p>
-            </div>
+            {/* Preview Section */}
+            <div className="bg-gradient-to-br from-[var(--color-bg-card)] to-[var(--color-bg-card-hover)] p-4 rounded-xl border border-[var(--color-border)] shadow-md">
+              <div className="flex items-center gap-1.5 mb-3">
+                <div className="w-1.5 h-1.5 bg-[var(--color-active-indicator)] rounded-full animate-pulse" />
+                <span className="text-xs font-semibold text-[var(--color-text-primary)]">
+                  Recording Preview
+                </span>
+              </div>
 
-            {/* Title Input */}
-            <div>
-              <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-                Title <span className="text-[var(--color-text-tertiary)]">(optional)</span>
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Give your recording a title..."
-                maxLength={100}
-                className="w-full px-4 py-3 bg-[var(--color-bg-input)] border border-[var(--color-border-light)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-border-focus)] transition-colors"
+              {/* Hidden audio element */}
+              <audio
+                ref={audioRef}
+                src={audioUrl}
+                onTimeUpdate={handleTimeUpdate}
+                onEnded={handleAudioEnded}
+                onLoadedMetadata={() => {
+                  if (audioRef.current) {
+                    setDuration(audioRef.current.duration);
+                  }
+                }}
               />
+
+              {/* Custom Audio Player */}
+              <div className="bg-[var(--color-bg-primary)] rounded-lg p-3 space-y-2">
+                {/* Play/Pause Button and Progress */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={togglePlayPause}
+                    className="w-10 h-10 flex items-center justify-center bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] rounded-full transition-all duration-200 shadow-md shadow-[var(--shadow-primary)] hover:scale-105"
+                  >
+                    {isPlaying ? (
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    )}
+                  </button>
+
+                  <div className="flex-1 space-y-1">
+                    {/* Progress Bar */}
+                    <input
+                      type="range"
+                      min="0"
+                      max={duration || recordingTime}
+                      value={currentTime}
+                      onChange={handleSeek}
+                      className="w-full h-1.5 bg-[var(--color-bg-elevated)] rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--color-btn-primary)] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[var(--color-btn-primary)] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+                      style={{
+                        background: `linear-gradient(to right, var(--color-btn-primary) 0%, var(--color-btn-primary) ${(currentTime / (duration || recordingTime)) * 100}%, var(--color-bg-elevated) ${(currentTime / (duration || recordingTime)) * 100}%, var(--color-bg-elevated) 100%)`
+                      }}
+                    />
+
+                    {/* Time Display */}
+                    <div className="flex items-center justify-between text-[10px] text-[var(--color-text-tertiary)]">
+                      <span className="font-mono">{formatTime(Math.floor(currentTime))}</span>
+                      <span className="font-mono">{formatTime(Math.floor(duration || recordingTime))}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] pt-2">
+                <span className="text-[var(--color-text-tertiary)]">
+                  {formatTime(Math.floor(duration || recordingTime))}
+                </span>
+                <span className="text-green-500 font-medium flex items-center gap-1">
+                  <span>✓</span>
+                  <span>Ready</span>
+                </span>
+              </div>
             </div>
 
-            {/* Description Input */}
-            <div>
-              <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-                Description <span className="text-[var(--color-text-tertiary)]">(optional)</span>
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Add a description..."
-                maxLength={500}
-                rows={3}
-                className="w-full px-4 py-3 bg-[var(--color-bg-input)] border border-[var(--color-border-light)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-border-focus)] transition-colors resize-none"
-              />
-              <p className="text-xs text-[var(--color-text-tertiary)] mt-1 text-right">
-                {description.length}/500
-              </p>
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[var(--color-border)]"></div>
+              </div>
+              <div className="relative flex justify-center text-[10px]">
+                <span className="bg-[var(--color-bg-card)] px-2 py-0.5 text-[var(--color-text-tertiary)] rounded-full">
+                  Add details
+                </span>
+              </div>
             </div>
 
-            <div className="flex gap-3">
+            {/* Form Section */}
+            <div className="space-y-3">
+              {/* Title Input */}
+              <div>
+                <label className="block text-xs font-semibold text-[var(--color-text-primary)] mb-1.5">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="What's this recording about?"
+                  maxLength={100}
+                  className="w-full px-3 py-2 text-sm bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-btn-primary)] focus:ring-offset-1 focus:ring-offset-[var(--color-bg-card)] focus:border-transparent transition-all duration-200"
+                />
+                {title.length > 0 && (
+                  <p className="text-[10px] text-[var(--color-text-tertiary)] mt-1">
+                    {title.length}/100
+                  </p>
+                )}
+              </div>
+
+              {/* Description Input */}
+              <div>
+                <label className="block text-xs font-semibold text-[var(--color-text-primary)] mb-1.5">
+                  Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Tell listeners more..."
+                  maxLength={500}
+                  rows={3}
+                  className="w-full px-3 py-2 text-sm bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-btn-primary)] focus:ring-offset-1 focus:ring-offset-[var(--color-bg-card)] focus:border-transparent transition-all duration-200 resize-none"
+                />
+                <p className="text-[10px] text-[var(--color-text-tertiary)] mt-1 text-right">
+                  {description.length}/500
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-2">
               <button
                 onClick={uploadRecording}
                 disabled={isUploading}
-                className="flex-1 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] disabled:bg-[var(--color-bg-elevated)] text-[var(--color-btn-primary-text)] disabled:text-[var(--color-text-tertiary)] font-semibold py-3 px-4 rounded-xl transition duration-200 shadow-lg shadow-[var(--shadow-primary)] flex items-center justify-center gap-2"
+                className="flex-1 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--color-btn-primary-text)] font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-md shadow-[var(--shadow-primary)] flex items-center justify-center gap-1.5 hover:scale-[1.02] text-sm"
               >
                 {isUploading ? (
                   <>
@@ -299,7 +420,8 @@ export function AudioRecorder({ onUploadSuccess }: AudioRecorderProps) {
               <button
                 onClick={discardRecording}
                 disabled={isUploading}
-                className="px-6 bg-[var(--color-bg-card-hover)] border-2 border-[var(--color-border)] hover:border-[var(--color-border-focus)] hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] font-semibold py-3 rounded-xl transition duration-200"
+                className="px-4 bg-[var(--color-bg-card-hover)] border border-[var(--color-border)] hover:bg-[var(--color-bg-elevated)] hover:border-red-500/50 text-[var(--color-text-secondary)] hover:text-red-400 font-semibold py-2.5 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                title="Discard recording"
               >
                 🗑️
               </button>

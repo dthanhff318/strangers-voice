@@ -1,6 +1,6 @@
-import { Home, Users, Mic, User } from 'lucide-react'
+import { Home, Users, Mic, User, Settings } from 'lucide-react'
 
-type NavTab = 'home' | 'follow' | 'profile'
+type NavTab = 'home' | 'follow' | 'profile' | 'settings'
 
 interface BottomNavProps {
   activeTab: NavTab
@@ -106,8 +106,28 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
               </span>
             </button>
 
-            {/* Spacer to balance layout */}
-            <div className="w-[72px]" />
+            {/* Settings Button */}
+            <button
+              onClick={() => onTabChange('settings')}
+              className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 ${
+                activeTab === 'settings'
+                  ? 'text-[var(--color-text-primary)]'
+                  : 'text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]'
+              }`}
+            >
+              <Settings
+                className={`w-6 h-6 transition-all duration-300 ${
+                  activeTab === 'settings'
+                    ? 'fill-[var(--color-accent-primary)] scale-110'
+                    : 'group-hover:scale-105'
+                }`}
+              />
+              <span className={`text-xs font-medium transition-all duration-300 ${
+                activeTab === 'settings' ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'
+              }`}>
+                Settings
+              </span>
+            </button>
           </div>
         </div>
       </div>

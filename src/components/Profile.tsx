@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { supabase } from '../lib/supabase'
-import { Camera, Edit2, Save, X, Loader2, User, Mic } from 'lucide-react'
+import { getMyRecordings, updateUserInfo } from '../lib/edgeFunctions'
+import { Camera, Edit2, Save, X, Loader2, User as UserIcon, Mic } from 'lucide-react'
+import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
 import { AvatarPicker } from './AvatarPicker'
 import { CompactAudioCard } from './CompactAudioCard'
+import { toast } from 'sonner'
 
 interface Recording {
   id: string
@@ -12,6 +14,7 @@ interface Recording {
   duration: number
   likes_count: number
   dislikes_count: number
+  user_id: string | null
   title: string | null
   description: string | null
 }
@@ -24,7 +27,6 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
   const { user, profile, refreshProfile } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [showAvatarPicker, setShowAvatarPicker] = useState(false)
   const [recordings, setRecordings] = useState<Recording[]>([])
   const [loadingRecordings, setLoadingRecordings] = useState(true)
@@ -52,15 +54,11 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
 
     try {
       setLoadingRecordings(true)
-      const { data, error: fetchError } = await supabase
-        .from('recordings')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+      const { data, error: fetchError } = await getMyRecordings()
 
       if (fetchError) throw fetchError
 
-      setRecordings(data || [])
+      setRecordings(data?.data || [])
     } catch (err) {
       console.error('Error fetching recordings:', err)
     } finally {
@@ -73,7 +71,7 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center text-center animate-in fade-in duration-500 px-4">
         <div className="w-24 h-24 mx-auto mb-6 bg-[var(--color-bg-card)] rounded-full flex items-center justify-center animate-in zoom-in duration-700 delay-100">
-          <User className="w-12 h-12 text-[var(--color-text-tertiary)]" />
+          <UserIcon className="w-12 h-12 text-[var(--color-text-tertiary)]" />
         </div>
         <h2 className="text-3xl font-bold text-[var(--color-text-primary)] mb-3 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
           Sign in to view your profile
@@ -101,33 +99,20 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
     // Auto-save avatar
     try {
       setSaving(true)
-      setError(null)
 
-      // Update user metadata
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: {
-          avatar_url: newAvatarUrl
-        }
-      })
+      // Call edge function to update user info
+      const { error } = await updateUserInfo(profile?.full_name || name, newAvatarUrl)
 
-      if (updateError) throw updateError
-
-      // Update profiles table
-      await supabase
-        .from('profiles')
-        .upsert({
-          id: user!.id,
-          full_name: profile?.full_name || name,
-          avatar_url: newAvatarUrl,
-          email: user!.email
-        })
+      if (error) throw error
 
       // Refresh profile data
       await refreshProfile()
+
+      toast.success('Avatar updated successfully')
       setShowAvatarPicker(false)
     } catch (err) {
       console.error('Error saving avatar:', err)
-      setError('Failed to save avatar. Please try again.')
+      toast.error('Failed to save avatar. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -136,34 +121,20 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
   const handleSave = async () => {
     try {
       setSaving(true)
-      setError(null)
 
-      // Update user metadata
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: {
-          full_name: name
-        }
-      })
+      // Call edge function to update user info
+      const { error } = await updateUserInfo(name, profile?.avatar_url || avatarUrl)
 
-      if (updateError) throw updateError
-
-      // Update profiles table
-      await supabase
-        .from('profiles')
-        .upsert({
-          id: user!.id,
-          full_name: name,
-          avatar_url: profile?.avatar_url || avatarUrl,
-          email: user!.email
-        })
+      if (error) throw error
 
       // Refresh profile data
       await refreshProfile()
 
+      toast.success('Profile updated successfully')
       setIsEditing(false)
     } catch (err) {
       console.error('Error saving name:', err)
-      setError('Failed to save name. Please try again.')
+      toast.error('Failed to save name. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -172,7 +143,6 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
   const handleCancel = () => {
     setName(profile?.full_name || '')
     setIsEditing(false)
-    setError(null)
   }
 
   return (
@@ -183,27 +153,18 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
           <h1 className="text-3xl font-bold text-[var(--color-text-primary)]">My Profile</h1>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-[var(--color-bg-card)] border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-lg animate-in slide-in-from-top-2">
-            {error}
-          </div>
-        )}
-
         {/* Profile Card */}
         <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-5">
           <div className="flex items-start gap-4">
             {/* Avatar */}
-            <div
-              className="relative w-16 h-16 rounded-full bg-[var(--color-bg-primary)] overflow-hidden flex-shrink-0 cursor-pointer group"
-              onClick={handleAvatarClick}
-            >
-              <img
-                src={avatarUrl}
-                alt="Profile"
-                className="w-full h-full object-cover group-hover:opacity-60 transition-opacity"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="relative flex-shrink-0 cursor-pointer group" onClick={handleAvatarClick}>
+              <Avatar className="w-16 h-16">
+                <AvatarImage src={avatarUrl} alt="Profile" className="group-hover:opacity-60 transition-opacity" />
+                <AvatarFallback className="bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
+                  {profile?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
                 <Camera className="w-5 h-5 text-[var(--color-text-primary)]" />
               </div>
             </div>
@@ -310,7 +271,11 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
             </div>
           ) : recordings.length === 0 ? (
             <div className="text-center py-12 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]">
-              <Mic className="w-12 h-12 mx-auto mb-4 text-[var(--color-text-tertiary)]" />
+              <div className="flex justify-center mb-4">
+                <div className="w-12 h-12 bg-[var(--color-btn-primary)] rounded-lg flex items-center justify-center opacity-50">
+                  <img src="/favicon.png" alt="Your Melody" className="w-8 h-8 logo-invert" />
+                </div>
+              </div>
               <h3 className="text-lg font-semibold text-[var(--color-text-secondary)] mb-2">
                 No recordings yet
               </h3>
@@ -321,7 +286,7 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
           ) : (
             <div className="space-y-3">
               {recordings.map((recording) => (
-                <CompactAudioCard key={recording.id} recording={recording} />
+                <CompactAudioCard key={recording.id} recording={recording} onDelete={fetchRecordings} />
               ))}
             </div>
           )}
@@ -334,6 +299,7 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
         onClose={() => setShowAvatarPicker(false)}
         onSelect={handleAvatarSelect}
         currentAvatar={avatarUrl}
+        saving={saving}
       />
     </div>
   )

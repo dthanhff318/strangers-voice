@@ -12,8 +12,8 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #111827;
-  color: #f3f4f6;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
 }
 
 /* Cursor pointer for all interactive elements */

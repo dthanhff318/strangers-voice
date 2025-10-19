@@ -79,7 +79,7 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
             <img src="" className="w-full h-full object-contain" alt="" />
           </div>
           <h2 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">
-            Welcome to Just Voice!
+            Welcome to Stranger Voice!
           </h2>
           <p className="text-[var(--color-text-tertiary)]">
             Let's set up your profile

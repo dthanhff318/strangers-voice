@@ -1,10 +1,12 @@
-import { X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X, Loader2 } from 'lucide-react'
 
 interface AvatarPickerProps {
   isOpen: boolean
   onClose: () => void
   onSelect: (avatarUrl: string) => void
   currentAvatar: string
+  saving?: boolean
 }
 
 // List of seed names for dicebear avatars
@@ -20,7 +22,16 @@ const AVATAR_SEEDS = [
 const AVATAR_STYLE = 'micah'
 const DICEBEAR_VERSION = '9.x'
 
-export function AvatarPicker({ isOpen, onClose, onSelect, currentAvatar }: AvatarPickerProps) {
+export function AvatarPicker({ isOpen, onClose, onSelect, currentAvatar, saving = false }: AvatarPickerProps) {
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState(currentAvatar)
+
+  // Reset selected avatar when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedAvatarUrl(currentAvatar)
+    }
+  }, [isOpen, currentAvatar])
+
   if (!isOpen) return null
 
   const getAvatarUrl = (seed: string) => {
@@ -29,8 +40,11 @@ export function AvatarPicker({ isOpen, onClose, onSelect, currentAvatar }: Avata
 
   const handleSelect = (seed: string) => {
     const avatarUrl = getAvatarUrl(seed)
-    onSelect(avatarUrl)
-    onClose()
+    setSelectedAvatarUrl(avatarUrl)
+  }
+
+  const handleUpdate = () => {
+    onSelect(selectedAvatarUrl)
   }
 
   return (
@@ -61,13 +75,14 @@ export function AvatarPicker({ isOpen, onClose, onSelect, currentAvatar }: Avata
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
             {AVATAR_SEEDS.map((seed) => {
               const avatarUrl = getAvatarUrl(seed)
-              const isSelected = currentAvatar.includes(seed)
+              const isSelected = selectedAvatarUrl.includes(seed)
 
               return (
                 <button
                   key={seed}
                   onClick={() => handleSelect(seed)}
-                  className={`relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-110 ${
+                  disabled={saving}
+                  className={`relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed ${
                     isSelected
                       ? 'ring-4 ring-[var(--color-btn-primary)] scale-105'
                       : 'ring-2 ring-[var(--color-border)] hover:ring-[var(--color-text-tertiary)]'
@@ -97,12 +112,29 @@ export function AvatarPicker({ isOpen, onClose, onSelect, currentAvatar }: Avata
           <p className="text-sm text-[var(--color-text-tertiary)]">
             Powered by <a href="https://www.dicebear.com" target="_blank" rel="noopener noreferrer" className="text-[var(--color-text-primary)] hover:underline">DiceBear</a>
           </p>
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-[var(--color-btn-secondary)] hover:bg-[var(--color-btn-secondary-hover)] text-[var(--color-btn-secondary-text)] rounded-lg font-medium transition-colors"
-          >
-            Close
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onClose}
+              disabled={saving}
+              className="px-6 py-2 bg-[var(--color-bg-elevated)] hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-primary)] hover:text-[var(--color-text-primary)] rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleUpdate}
+              disabled={saving || selectedAvatarUrl === currentAvatar}
+              className="px-6 py-2 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Update'
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

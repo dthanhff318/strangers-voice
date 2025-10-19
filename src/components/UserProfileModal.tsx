@@ -163,7 +163,7 @@ export function UserProfileModal({
             {/* Additional Info */}
             <div className="mt-4 text-center">
               <p className="text-xs text-[var(--color-text-muted)]">
-                Member of Just Voice Community
+                Member of Stranger Voice Community
               </p>
             </div>
           </div>

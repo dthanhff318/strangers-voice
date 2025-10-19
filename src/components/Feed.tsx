@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
+import { getTrendingRecordsDashboard } from "../lib/edgeFunctions";
 import { AudioCard } from "./AudioCard";
 import { AudioLoading } from "./AudioLoading";
-import { Sparkles } from "lucide-react";
+import { Sparkles, TrendingUp } from "lucide-react";
 
 interface Recording {
   id: string;
@@ -59,23 +60,11 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
-        .from("recordings")
-        .select(
-          `
-          *,
-          profiles!user_id(
-            id,
-            full_name,
-            avatar_url
-          )
-        `
-        )
-        .order("created_at", { ascending: false });
+      const { data, error: fetchError } = await getTrendingRecordsDashboard();
 
       if (fetchError) throw fetchError;
 
-      setRecordings(data || []);
+      setRecordings(data?.data || []);
     } catch (err) {
       console.error("Error fetching recordings:", err);
       setError("Failed to load recordings");
@@ -103,14 +92,14 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
         <div className="absolute inset-0 bg-[var(--color-accent-subtle)] blur-3xl -z-10" />
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="w-1 h-8 bg-[var(--color-accent-primary)] rounded-full" />
+            <TrendingUp className="w-8 h-8 text-[var(--color-accent-primary)]" />
             <h1 className="text-4xl font-bold text-[var(--color-text-primary)]">
-              Popular voices
+              Trending voices
             </h1>
           </div>
           <p className="text-[var(--color-text-tertiary)] text-lg ml-4 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-[var(--color-accent-primary)]" />
-            Curated audio experiences just for you
+            Top 10 most liked recordings
           </p>
         </div>
       </div>
@@ -118,7 +107,11 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
       {/* Recordings List */}
       {recordings.length === 0 ? (
         <div className="text-center py-12">
-          <span className="text-6xl mb-4 block">🎙️</span>
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 bg-[var(--color-btn-primary)] rounded-xl flex items-center justify-center opacity-50">
+              <img src="/favicon.png" alt="Your Melody" className="w-10 h-10 logo-invert" />
+            </div>
+          </div>
           <h3 className="text-xl font-semibold text-[var(--color-text-secondary)] mb-2">
             No recordings yet
           </h3>
@@ -133,6 +126,7 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
               key={recording.id}
               recording={recording}
               onLoginRequired={onLoginRequired}
+              onDelete={fetchRecordings}
             />
           ))}
         </div>

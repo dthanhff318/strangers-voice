@@ -11,14 +11,14 @@ export function AudioLoading() {
           {/* Gradient Definitions */}
           <defs>
             <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#6366f1" stopOpacity="0.3" />
-              <stop offset="50%" stopColor="#8b5cf6" stopOpacity="1" />
-              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.3" />
+              <stop offset="0%" stopColor="#737373" stopOpacity="0.3" />
+              <stop offset="50%" stopColor="#FFFFFF" stopOpacity="1" />
+              <stop offset="100%" stopColor="#737373" stopOpacity="0.3" />
             </linearGradient>
             <radialGradient id="circleGradient">
-              <stop offset="0%" stopColor="#fbbf24" />
-              <stop offset="50%" stopColor="#8b5cf6" />
-              <stop offset="100%" stopColor="#6366f1" />
+              <stop offset="0%" stopColor="#FFFFFF" />
+              <stop offset="50%" stopColor="#E5E5E5" />
+              <stop offset="100%" stopColor="#A3A3A3" />
             </radialGradient>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
@@ -79,7 +79,7 @@ export function AudioLoading() {
             cx="200"
             cy="60"
             r="12"
-            fill="#fbbf24"
+            fill="#FFFFFF"
             opacity="0.8"
           >
             <animate
@@ -117,8 +117,9 @@ export function MiniAudioLoading() {
       {[...Array(3)].map((_, i) => (
         <div
           key={i}
-          className="w-1 bg-orange-500 rounded-full"
+          className="w-1 rounded-full"
           style={{
+            backgroundColor: '#FFFFFF',
             height: `${12 + Math.sin(i) * 4}px`,
             animation: 'wave 0.8s ease-in-out infinite',
             animationDelay: `${i * 0.1}s`

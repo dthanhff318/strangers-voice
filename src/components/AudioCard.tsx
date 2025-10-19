@@ -1,9 +1,27 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
+import { deleteRecord } from "../lib/edgeFunctions";
+import { toast } from "sonner";
 import WaveSurfer from "wavesurfer.js";
-import { Flame, MessageCircle, Play, Pause } from "lucide-react";
+import { Flame, MessageCircle, Play, Pause, MoreVertical, Heart, Flag, Trash2, Loader2 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { UserProfileModal } from "./UserProfileModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 
 interface Recording {
   id: string;
@@ -25,15 +43,18 @@ interface Recording {
 interface AudioCardProps {
   recording: Recording;
   onLoginRequired?: () => void;
+  onDelete?: () => void;
 }
 
-export function AudioCard({ recording, onLoginRequired }: AudioCardProps) {
+export function AudioCard({ recording, onLoginRequired, onDelete }: AudioCardProps) {
   const { user } = useAuth();
   const [isPlaying, setIsPlaying] = useState(false);
   const [userLike, setUserLike] = useState<boolean | null>(null);
   const [likesCount, setLikesCount] = useState(recording.likes_count);
   const [dislikesCount, setDislikesCount] = useState(recording.dislikes_count);
   const [showUserProfile, setShowUserProfile] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const waveformRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
 
@@ -158,6 +179,31 @@ export function AudioCard({ recording, onLoginRequired }: AudioCardProps) {
     }
   };
 
+  const confirmDelete = async () => {
+    if (!user || recording.user_id !== user.id) return;
+
+    try {
+      setIsDeleting(true);
+
+      // Call edge function to delete the recording
+      const { error } = await deleteRecord(recording.id);
+
+      if (error) throw error;
+
+      // Show success toast
+      toast.success('Recording deleted successfully');
+
+      // Call onDelete callback to refresh the list
+      onDelete?.();
+      setShowDeleteDialog(false);
+    } catch (error) {
+      console.error('Error deleting recording:', error);
+      toast.error('Failed to delete recording. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -176,15 +222,18 @@ export function AudioCard({ recording, onLoginRequired }: AudioCardProps) {
       {/* Top Row: Avatar, Name, Description, Duration */}
       <div className="flex items-center gap-3 md:gap-4">
         {/* Avatar */}
-        <img
-          src={recording.profiles?.avatar_url || ""}
-          alt={recording.profiles?.full_name || ""}
-          className="w-12 h-12 md:w-16 md:h-16 rounded-full flex-shrink-0 hover:opacity-80 transition-opacity"
+        <Avatar
+          className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={(e) => {
             e.stopPropagation();
             setShowUserProfile(true);
           }}
-        />
+        >
+          <AvatarImage src={recording.profiles?.avatar_url || ""} alt={recording.profiles?.full_name || ""} />
+          <AvatarFallback className="bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
+            {recording.profiles?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+          </AvatarFallback>
+        </Avatar>
 
         {/* Author & Title */}
         <div className="flex-1 min-w-0">
@@ -200,14 +249,35 @@ export function AudioCard({ recording, onLoginRequired }: AudioCardProps) {
         <div className="text-[var(--color-text-tertiary)] text-sm font-medium flex-shrink-0">
           {formatDuration(recording.duration)}
         </div>
-      </div>
 
-      {/* Description (if exists) */}
-      {recording.description && (
-        <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed pl-[52px] md:pl-[64px]">
-          {recording.description}
-        </p>
-      )}
+        {/* Menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-2 rounded-lg hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all flex-shrink-0">
+              <MoreVertical className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-[var(--color-bg-card)] border-[var(--color-border)]">
+            <DropdownMenuItem disabled className="opacity-50 cursor-not-allowed text-[var(--color-text-tertiary)]">
+              <Heart className="w-4 h-4 mr-2" />
+              Like
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled className="opacity-50 cursor-not-allowed text-[var(--color-text-tertiary)]">
+              <Flag className="w-4 h-4 mr-2" />
+              Report
+            </DropdownMenuItem>
+            {user && recording.user_id === user.id && (
+              <DropdownMenuItem
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-red-600 focus:bg-[var(--color-bg-elevated)] focus:text-red-600"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       {/* Middle Row: Play Button & Waveform */}
       <div className="flex items-center gap-3 md:gap-4">
@@ -280,6 +350,43 @@ export function AudioCard({ recording, onLoginRequired }: AudioCardProps) {
           }}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="bg-[var(--color-bg-card)] border-[var(--color-border)]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[var(--color-text-primary)]">
+              Delete Recording
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[var(--color-text-secondary)]">
+              Are you sure you want to delete this recording? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className="bg-[var(--color-bg-elevated)] hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-primary)] hover:text-[var(--color-text-primary)] border-[var(--color-border)]"
+              disabled={isDeleting}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <button
+              type="button"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+              className="inline-flex items-center justify-center h-10 px-4 py-2 text-sm font-semibold text-white transition-colors bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

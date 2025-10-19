@@ -53,7 +53,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         >
           {/* Header */}
           <div className="relative flex items-center justify-center py-6 border-b border-gray-800">
-            <h2 className="text-xl font-semibold text-white">Welcome to Just Voice</h2>
+            <h2 className="text-xl font-semibold text-white">Welcome to Stranger Voice</h2>
             <button
               onClick={onClose}
               className="absolute right-4 p-2 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-gray-800"

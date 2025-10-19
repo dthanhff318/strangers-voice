@@ -16,7 +16,9 @@ export function Follow() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [recommendedUsers, setRecommendedUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingRecommended, setLoadingRecommended] = useState(false);
   const [recordingsCounts, setRecordingsCounts] = useState<
     Record<string, number>
   >({});
@@ -97,6 +99,39 @@ export function Follow() {
     }
   };
 
+  const fetchRecommendedUsers = async () => {
+    if (!user?.id) return;
+
+    try {
+      setLoadingRecommended(true);
+
+      // Get random 5 users (excluding current user)
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, avatar_url, email")
+        .neq("id", user.id)
+        .limit(100); // Get more to shuffle client-side
+
+      if (error) throw error;
+
+      // Shuffle and take 5
+      const shuffled = (data || []).sort(() => Math.random() - 0.5).slice(0, 5);
+      setRecommendedUsers(shuffled);
+
+      // Fetch recordings count for recommended users
+      fetchRecordingsCounts(shuffled.map((u) => u.id));
+    } catch (err) {
+      console.error("Error fetching recommended users:", err);
+    } finally {
+      setLoadingRecommended(false);
+    }
+  };
+
+  // Fetch recommended users on mount
+  useEffect(() => {
+    fetchRecommendedUsers();
+  }, [user?.id]);
+
   return (
     <div className="min-h-[70vh] animate-in fade-in duration-500">
       {/* Header */}
@@ -131,16 +166,80 @@ export function Follow() {
 
       {/* Results */}
       {searchQuery.trim() === "" ? (
-        <div className="text-center py-20">
-          <div className="w-20 h-20 mx-auto mb-6 bg-[var(--color-bg-card)] rounded-full flex items-center justify-center">
-            <Search className="w-10 h-10 text-[var(--color-text-tertiary)]" />
+        <div>
+          {/* Recommended Users Section */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-5 h-5 text-[var(--color-accent-primary)]" />
+              <h2 className="text-xl font-bold text-[var(--color-text-primary)]">
+                Recommended Users
+              </h2>
+            </div>
+
+            {loadingRecommended ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 text-[var(--color-text-tertiary)] animate-spin" />
+              </div>
+            ) : recommendedUsers.length === 0 ? (
+              <div className="text-center py-12 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]">
+                <Users className="w-12 h-12 mx-auto mb-3 text-[var(--color-text-tertiary)]" />
+                <p className="text-[var(--color-text-tertiary)]">
+                  No users available yet
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {recommendedUsers.map((userProfile) => (
+                  <div
+                    key={userProfile.id}
+                    onClick={() => {
+                      setSelectedUser(userProfile);
+                      setShowUserProfile(true);
+                    }}
+                    className="bg-[var(--color-bg-card)] rounded-xl p-5 border border-[var(--color-border)] hover:bg-[var(--color-bg-card-hover)] transition-all hover:border-[var(--color-border-light)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Avatar */}
+                      <img
+                        src={
+                          userProfile.avatar_url ||
+                          `https://api.dicebear.com/9.x/micah/svg?seed=${userProfile.id}`
+                        }
+                        alt={userProfile.full_name || "User"}
+                        className="w-16 h-16 rounded-full flex-shrink-0 border-2 border-[var(--color-border)]"
+                      />
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-[var(--color-text-primary)] text-lg truncate mb-1">
+                          {userProfile.full_name || "Anonymous User"}
+                        </h3>
+                        <div className="flex items-center gap-1.5 text-sm text-[var(--color-text-tertiary)]">
+                          <Mic className="w-3.5 h-3.5" />
+                          <span>
+                            {recordingsCounts[userProfile.id] !== undefined
+                              ? `${recordingsCounts[userProfile.id]} recordings`
+                              : "Loading..."}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <h3 className="text-xl font-semibold text-[var(--color-text-secondary)] mb-2">
-            Start searching
-          </h3>
-          <p className="text-[var(--color-text-tertiary)]">
-            Type a name to find voice creators
-          </p>
+
+          {/* Search prompt */}
+          <div className="text-center py-12 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]">
+            <Search className="w-12 h-12 mx-auto mb-3 text-[var(--color-text-tertiary)]" />
+            <h3 className="text-lg font-semibold text-[var(--color-text-secondary)] mb-1">
+              Search for more users
+            </h3>
+            <p className="text-sm text-[var(--color-text-tertiary)]">
+              Type a name to find specific voice creators
+            </p>
+          </div>
         </div>
       ) : users.length === 0 && !loading ? (
         <div className="text-center py-20">
@@ -163,7 +262,7 @@ export function Follow() {
                 setSelectedUser(userProfile);
                 setShowUserProfile(true);
               }}
-              className="bg-[var(--color-bg-card)] rounded-xl p-5 border border-[var(--color-border)] hover:bg-[var(--color-bg-card-hover)] transition-all hover:border-[var(--color-border-light)] hover:scale-[1.02] active:scale-[0.98]"
+              className="bg-[var(--color-bg-card)] rounded-xl p-5 border border-[var(--color-border)] hover:bg-[var(--color-bg-card-hover)] transition-all hover:border-[var(--color-border-light)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               <div className="flex items-center gap-4">
                 {/* Avatar */}

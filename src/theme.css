@@ -1,5 +1,8 @@
-/* Just Voice - Monochrome Minimal Theme */
-:root {
+/* Your Melody - Monochrome Minimal Theme */
+
+/* Dark Mode (Default) */
+:root,
+.dark {
   /* Background Colors */
   --color-bg-primary: #000000;           /* Main background - Pure black */
   --color-bg-secondary: #0A0A0A;         /* Secondary background */
@@ -45,4 +48,58 @@
   /* Waveform Colors */
   --color-wave-bg: #525252;              /* Waveform background (neutral-600) */
   --color-wave-progress: #FFFFFF;        /* Waveform progress - White */
+}
+
+/* Light Mode */
+.light {
+  /* Background Colors */
+  --color-bg-primary: #FFFFFF;           /* Main background - Pure white */
+  --color-bg-secondary: #F5F5F5;         /* Secondary background */
+  --color-bg-card: #FAFAFA;              /* Card background (neutral-50) */
+  --color-bg-card-hover: #F5F5F5;        /* Card hover (neutral-100) */
+  --color-bg-elevated: #D4D4D4;          /* Elevated elements (neutral-300) */
+  --color-bg-input: #FFFFFF;             /* Input background - Pure white */
+
+  /* Text Colors */
+  --color-text-primary: #000000;         /* Primary text - Black */
+  --color-text-secondary: #262626;       /* Secondary text */
+  --color-text-tertiary: #737373;        /* Tertiary text (neutral-500) */
+  --color-text-muted: #A3A3A3;           /* Muted text (neutral-400) */
+  --color-text-inverse: #FFFFFF;         /* Text on black background */
+
+  /* Border Colors */
+  --color-border: #E5E5E5;               /* Primary border (neutral-200) */
+  --color-border-light: #D4D4D4;         /* Light border (neutral-300) */
+  --color-border-focus: #000000;         /* Focus border - Black */
+
+  /* Button Colors */
+  --color-btn-primary: #000000;          /* Primary button bg - Black */
+  --color-btn-primary-hover: #262626;    /* Primary button hover (neutral-800) */
+  --color-btn-primary-text: #FFFFFF;     /* Primary button text - White */
+
+  --color-btn-secondary: #D4D4D4;        /* Secondary button bg (neutral-300) */
+  --color-btn-secondary-hover: #A3A3A3;  /* Secondary button hover (neutral-400) */
+  --color-btn-secondary-text: #000000;   /* Secondary button text - Black */
+
+  /* Accent & Active States */
+  --color-accent-primary: #000000;       /* Primary accent - Black */
+  --color-accent-subtle: rgba(0, 0, 0, 0.05);  /* Subtle accent bg */
+  --color-accent-hover: rgba(0, 0, 0, 0.1);    /* Hover accent bg */
+
+  /* Special States */
+  --color-active-indicator: #000000;     /* Active state indicator */
+  --color-inactive: #A3A3A3;             /* Inactive state (neutral-400) */
+
+  /* Shadows */
+  --shadow-primary: rgba(0, 0, 0, 0.1);  /* Black shadow */
+  --shadow-subtle: rgba(0, 0, 0, 0.05);   /* Subtle shadow */
+
+  /* Waveform Colors */
+  --color-wave-bg: #A3A3A3;              /* Waveform background (neutral-400) */
+  --color-wave-progress: #000000;        /* Waveform progress - Black */
+}
+
+/* Logo inversion for light mode */
+.light .logo-invert {
+  filter: invert(1);
 }
