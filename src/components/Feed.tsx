@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { getTrendingRecordsDashboard } from "../lib/edgeFunctions";
 import { AudioCard } from "./AudioCard";
@@ -27,14 +28,24 @@ interface FeedProps {
 }
 
 export function Feed({ onLoginRequired }: FeedProps = {}) {
-  const [recordings, setRecordings] = useState<Recording[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
+  // Use React Query for data fetching with caching
+  const {
+    data: recordings = [],
+    isLoading: loading,
+    error,
+  } = useQuery<Recording[]>({
+    queryKey: ["trending-recordings"],
+    queryFn: async () => {
+      const { data, error: fetchError } = await getTrendingRecordsDashboard();
+      if (fetchError) throw fetchError;
+      return (data?.data || []) as Recording[];
+    },
+  });
+
+  // Subscribe to realtime changes and invalidate cache
   useEffect(() => {
-    fetchRecordings();
-
-    // Subscribe to realtime changes
     const channel = supabase
       .channel("recordings-changes")
       .on(
@@ -45,7 +56,8 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
           table: "recordings",
         },
         () => {
-          fetchRecordings();
+          // Invalidate and refetch the query when data changes
+          queryClient.invalidateQueries({ queryKey: ["trending-recordings"] });
         }
       )
       .subscribe();
@@ -53,25 +65,7 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
-
-  const fetchRecordings = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error: fetchError } = await getTrendingRecordsDashboard();
-
-      if (fetchError) throw fetchError;
-
-      setRecordings(data?.data || []);
-    } catch (err) {
-      console.error("Error fetching recordings:", err);
-      setError("Failed to load recordings");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [queryClient]);
 
   if (loading) {
     return <AudioLoading />;
@@ -80,10 +74,15 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
   if (error) {
     return (
       <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] text-[var(--color-text-primary)] px-4 py-3 rounded-lg">
-        {error}
+        {error instanceof Error ? error.message : "Failed to load recordings"}
       </div>
     );
   }
+
+  // Refresh data on delete
+  const handleDelete = () => {
+    queryClient.invalidateQueries({ queryKey: ["trending-recordings"] });
+  };
 
   return (
     <div className="space-y-8">
@@ -109,7 +108,7 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
         <div className="text-center py-12">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-[var(--color-btn-primary)] rounded-xl flex items-center justify-center opacity-50">
-              <img src="/favicon.png" alt="Your Melody" className="w-10 h-10 logo-invert" />
+              <img src="/favicon.png" alt="YMelody" className="w-10 h-10 logo-invert" />
             </div>
           </div>
           <h3 className="text-xl font-semibold text-[var(--color-text-secondary)] mb-2">
@@ -126,7 +125,7 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
               key={recording.id}
               recording={recording}
               onLoginRequired={onLoginRequired}
-              onDelete={fetchRecordings}
+              onDelete={handleDelete}
             />
           ))}
         </div>

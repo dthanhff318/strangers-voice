@@ -30,7 +30,7 @@ export function TermsOfServiceModal({ isOpen, onClose }: TermsOfServiceModalProp
               1. Acceptance of Terms
             </h2>
             <p className="text-sm leading-relaxed">
-              By accessing and using Your Melody, you accept and agree to be bound by these Terms of Service.
+              By accessing and using YMelody, you accept and agree to be bound by these Terms of Service.
               If you do not agree to these terms, please do not use our platform.
             </p>
           </section>
@@ -72,7 +72,7 @@ export function TermsOfServiceModal({ isOpen, onClose }: TermsOfServiceModalProp
               4. Intellectual Property
             </h2>
             <p className="text-sm leading-relaxed mb-2">
-              By uploading voice recordings to Your Melody, you grant us a non-exclusive, worldwide,
+              By uploading voice recordings to YMelody, you grant us a non-exclusive, worldwide,
               royalty-free license to use, reproduce, and distribute your content on the platform.
             </p>
             <p className="text-sm leading-relaxed">
@@ -105,7 +105,7 @@ export function TermsOfServiceModal({ isOpen, onClose }: TermsOfServiceModalProp
               7. Limitation of Liability
             </h2>
             <p className="text-sm leading-relaxed">
-              Your Melody is provided "as is" without warranties of any kind. We are not liable for any
+              YMelody is provided "as is" without warranties of any kind. We are not liable for any
               damages arising from your use of the platform.
             </p>
           </section>

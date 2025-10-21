@@ -71,7 +71,7 @@ function App() {
               <img src="/favicon.png" alt="" className="w-6 h-6 logo-invert" />
             </div>
             <span className="text-xl font-bold text-[var(--color-text-primary)]">
-              Your Melody
+              YMelody
             </span>
           </div>
 

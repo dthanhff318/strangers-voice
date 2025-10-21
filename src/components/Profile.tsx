@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../contexts/AuthContext'
 import { getMyRecordings, updateUserInfo } from '../lib/edgeFunctions'
 import { Camera, Edit2, Save, X, Loader2, User as UserIcon, Mic } from 'lucide-react'
@@ -25,11 +26,10 @@ interface ProfileProps {
 
 export function Profile({ onLoginRequired }: ProfileProps = {}) {
   const { user, profile, refreshProfile } = useAuth()
+  const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showAvatarPicker, setShowAvatarPicker] = useState(false)
-  const [recordings, setRecordings] = useState<Recording[]>([])
-  const [loadingRecordings, setLoadingRecordings] = useState(true)
 
   const [name, setName] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
@@ -42,28 +42,24 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
     }
   }, [profile, user])
 
-  // Fetch user's recordings
-  useEffect(() => {
-    if (user) {
-      fetchRecordings()
-    }
-  }, [user])
-
-  const fetchRecordings = async () => {
-    if (!user) return
-
-    try {
-      setLoadingRecordings(true)
+  // Use React Query for fetching user's recordings with caching
+  const {
+    data: recordings = [],
+    isLoading: loadingRecordings,
+  } = useQuery<Recording[]>({
+    queryKey: ['my-recordings', user?.id],
+    queryFn: async () => {
+      if (!user) return []
       const { data, error: fetchError } = await getMyRecordings()
-
       if (fetchError) throw fetchError
+      return (data?.data || []) as Recording[]
+    },
+    enabled: !!user, // Only fetch when user is logged in
+  })
 
-      setRecordings(data?.data || [])
-    } catch (err) {
-      console.error('Error fetching recordings:', err)
-    } finally {
-      setLoadingRecordings(false)
-    }
+  // Refresh recordings on delete
+  const handleDeleteRecording = () => {
+    queryClient.invalidateQueries({ queryKey: ['my-recordings', user?.id] })
   }
 
   // If not logged in, show login prompt
@@ -273,7 +269,7 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
             <div className="text-center py-12 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]">
               <div className="flex justify-center mb-4">
                 <div className="w-12 h-12 bg-[var(--color-btn-primary)] rounded-lg flex items-center justify-center opacity-50">
-                  <img src="/favicon.png" alt="Your Melody" className="w-8 h-8 logo-invert" />
+                  <img src="/favicon.png" alt="YMelody" className="w-8 h-8 logo-invert" />
                 </div>
               </div>
               <h3 className="text-lg font-semibold text-[var(--color-text-secondary)] mb-2">
@@ -286,7 +282,7 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
           ) : (
             <div className="space-y-3">
               {recordings.map((recording) => (
-                <CompactAudioCard key={recording.id} recording={recording} onDelete={fetchRecordings} />
+                <CompactAudioCard key={recording.id} recording={recording} onDelete={handleDeleteRecording} />
               ))}
             </div>
           )}
