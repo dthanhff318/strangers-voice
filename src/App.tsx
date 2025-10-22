@@ -6,6 +6,7 @@ import { LoginModal } from "./components/LoginModal";
 import { OnboardingModal } from "./components/OnboardingModal";
 import { Toaster } from "@/components/ui/sonner";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -23,12 +24,13 @@ import {
 import { Profile } from "./components/Profile";
 import { Follow } from "./components/Follow";
 import { Settings } from "./components/Settings";
+import { Admin } from "./components/Admin";
 import { RecordPlayerModal } from "./components/RecordPlayerModal";
 import { useAuth } from "./contexts/AuthContext";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, LayoutDashboard } from "lucide-react";
 import "./App.css";
 
-type NavTab = "home" | "follow" | "profile" | "settings";
+type NavTab = "home" | "follow" | "profile" | "settings" | "admin";
 
 function App() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -85,7 +87,7 @@ function App() {
           ) : profile && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 hover:bg-[var(--color-bg-card)] px-3 py-2 rounded-lg transition-colors">
+                <Button variant="ghost" className="flex items-center gap-2 hover:bg-[var(--color-bg-card)] px-3 py-2 rounded-lg transition-colors">
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={profile?.avatar_url ?? ""} alt={profile?.full_name ?? ""} />
                     <AvatarFallback className="bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] text-xs">
@@ -95,7 +97,7 @@ function App() {
                   <span className="text-[var(--color-text-primary)] text-sm font-medium hidden md:block">
                     {profile?.full_name}
                   </span>
-                </button>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
@@ -110,6 +112,15 @@ function App() {
                   </p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-[var(--color-border)]" />
+                {profile?.email === "dthanhff318@gmail.com" && (
+                  <DropdownMenuItem
+                    onClick={() => setActiveTab("admin")}
+                    className="text-[var(--color-text-tertiary)] focus:bg-[var(--color-bg-elevated)] focus:text-[var(--color-text-primary)]"
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>Dashboard</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   onClick={handleSignOut}
                   className="text-[var(--color-text-tertiary)] focus:bg-[var(--color-bg-elevated)] focus:text-[var(--color-text-primary)]"
@@ -120,13 +131,13 @@ function App() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <button
+            <Button
               onClick={() => setShowLoginModal(true)}
               className="flex items-center gap-2 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] px-4 py-2 rounded-lg transition-all font-medium"
             >
               <User className="w-4 h-4" />
               <span>Sign in</span>
-            </button>
+            </Button>
           )}
         </div>
       </nav>
@@ -156,6 +167,10 @@ function App() {
           <div className="animate-in fade-in duration-500">
             <Settings />
           </div>
+        )}
+
+        {activeTab === "admin" && (
+          <Admin />
         )}
       </div>
 

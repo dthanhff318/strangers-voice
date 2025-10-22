@@ -29,6 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import { Button } from "./ui/button";
 
 interface Recording {
   id: string;
@@ -172,9 +173,9 @@ export function CompactAudioCard({
           {/* Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="p-1 rounded-md hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all">
+              <Button variant="ghost" size="icon-sm" className="p-1 rounded-md hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all">
                 <MoreVertical className="w-3.5 h-3.5" />
-              </button>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
@@ -210,7 +211,8 @@ export function CompactAudioCard({
 
       {/* Play Button & Waveform */}
       <div className="flex items-center gap-2">
-        <button
+        <Button
+          size="icon-sm"
           onClick={togglePlayPause}
           className="w-8 h-8 rounded-full bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] flex items-center justify-center transition-all hover:scale-105 shadow-md shadow-[var(--shadow-primary)] flex-shrink-0"
         >
@@ -225,7 +227,7 @@ export function CompactAudioCard({
               fill="var(--color-btn-primary-text)"
             />
           )}
-        </button>
+        </Button>
 
         <div
           ref={waveformRef}
@@ -269,7 +271,8 @@ export function CompactAudioCard({
             >
               Cancel
             </AlertDialogCancel>
-            <button
+            <Button
+              variant="destructive"
               type="button"
               onClick={confirmDelete}
               disabled={isDeleting}
@@ -283,7 +286,7 @@ export function CompactAudioCard({
               ) : (
                 "Delete"
               )}
-            </button>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

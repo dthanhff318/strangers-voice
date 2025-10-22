@@ -1,6 +1,7 @@
 import { X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useState } from 'react'
+import { Button } from './ui/button'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -54,12 +55,14 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           {/* Header */}
           <div className="relative flex items-center justify-center py-6 border-b border-gray-800">
             <h2 className="text-xl font-semibold text-white">Welcome to Stranger Voice</h2>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onClose}
               className="absolute right-4 p-2 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-gray-800"
             >
               <X className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
 
           {/* Content */}
@@ -75,7 +78,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             </div>
 
             {/* Google Login Button */}
-            <button
+            <Button
               onClick={handleGoogleLogin}
               disabled={loading}
               className="w-full bg-white hover:bg-gray-50 text-gray-900 font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
@@ -105,7 +108,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   <span>Continue with Google</span>
                 </>
               )}
-            </button>
+            </Button>
 
             {/* Divider */}
             <div className="relative">

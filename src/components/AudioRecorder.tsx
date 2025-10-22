@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { MiniAudioLoading } from "./AudioLoading";
 import { useAuth } from "../contexts/AuthContext";
+import { Button } from "./ui/button";
 
 interface AudioRecorderProps {
   onUploadSuccess?: () => void;
@@ -229,13 +230,13 @@ export function AudioRecorder({ onUploadSuccess }: AudioRecorderProps) {
 
       <div className="space-y-4">
         {!isRecording && !audioBlob && (
-          <button
+          <Button
             onClick={startRecording}
             className="w-full bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md shadow-[var(--shadow-primary)] hover:scale-[1.02]"
           >
             <span className="text-xl">🎙️</span>
             <span className="text-sm">Start Recording</span>
-          </button>
+          </Button>
         )}
 
         {isRecording && (
@@ -252,18 +253,20 @@ export function AudioRecorder({ onUploadSuccess }: AudioRecorderProps) {
             </div>
 
             <div className="flex gap-2">
-              <button
+              <Button
+                variant="outline"
                 onClick={pauseRecording}
                 className="flex-1 bg-[var(--color-bg-card-hover)] border border-[var(--color-btn-primary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] font-semibold py-2.5 px-3 rounded-lg transition duration-200 text-sm"
               >
                 {isPaused ? "▶️ Resume" : "⏸️ Pause"}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
                 onClick={stopRecording}
                 className="flex-1 bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] font-semibold py-2.5 px-3 rounded-lg transition duration-200 border border-[var(--color-border)] text-sm"
               >
                 ⏹️ Stop
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -296,7 +299,8 @@ export function AudioRecorder({ onUploadSuccess }: AudioRecorderProps) {
               <div className="bg-[var(--color-bg-primary)] rounded-lg p-3 space-y-2">
                 {/* Play/Pause Button and Progress */}
                 <div className="flex items-center gap-3">
-                  <button
+                  <Button
+                    size="icon"
                     onClick={togglePlayPause}
                     className="w-10 h-10 flex items-center justify-center bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] rounded-full transition-all duration-200 shadow-md shadow-[var(--shadow-primary)] hover:scale-105"
                   >
@@ -309,7 +313,7 @@ export function AudioRecorder({ onUploadSuccess }: AudioRecorderProps) {
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     )}
-                  </button>
+                  </Button>
 
                   <div className="flex-1 space-y-1">
                     {/* Progress Bar */}
@@ -400,7 +404,7 @@ export function AudioRecorder({ onUploadSuccess }: AudioRecorderProps) {
 
             {/* Action Buttons */}
             <div className="flex gap-2 pt-2">
-              <button
+              <Button
                 onClick={uploadRecording}
                 disabled={isUploading}
                 className="flex-1 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--color-btn-primary-text)] font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-md shadow-[var(--shadow-primary)] flex items-center justify-center gap-1.5 hover:scale-[1.02] text-sm"
@@ -416,15 +420,17 @@ export function AudioRecorder({ onUploadSuccess }: AudioRecorderProps) {
                     <span>Publish</span>
                   </>
                 )}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
                 onClick={discardRecording}
                 disabled={isUploading}
                 className="px-4 bg-[var(--color-bg-card-hover)] border border-[var(--color-border)] hover:bg-[var(--color-bg-elevated)] hover:border-red-500/50 text-[var(--color-text-secondary)] hover:text-red-400 font-semibold py-2.5 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 title="Discard recording"
               >
                 🗑️
-              </button>
+              </Button>
             </div>
           </div>
         )}

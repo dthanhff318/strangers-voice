@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 import type { User } from "@supabase/supabase-js";
 import { AvatarPicker } from "./AvatarPicker";
 import { Loader2 } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface OnboardingModalProps {
   user: User;
@@ -109,9 +110,10 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
 
               {/* Avatar Preview */}
               <div className="flex justify-center">
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => setShowAvatarPicker(true)}
-                  className="relative group"
+                  className="relative group h-auto p-0 hover:bg-transparent"
                 >
                   <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[var(--color-border)] hover:border-[var(--color-btn-primary)] transition-all group-hover:scale-105">
                     <img
@@ -125,16 +127,16 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
                       Change
                     </span>
                   </div>
-                </button>
+                </Button>
               </div>
 
               {/* Continue Button */}
-              <button
+              <Button
                 onClick={handleContinueToName}
                 className="w-full bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] font-semibold py-4 rounded-xl transition-all hover:scale-105 shadow-lg shadow-[var(--shadow-primary)]"
               >
                 Continue
-              </button>
+              </Button>
             </div>
           )}
 
@@ -186,14 +188,15 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
 
               {/* Action Buttons */}
               <div className="flex gap-3">
-                <button
+                <Button
+                  variant="secondary"
                   onClick={() => setStep("avatar")}
                   disabled={saving}
                   className="flex-1 bg-[var(--color-btn-secondary)] hover:bg-[var(--color-btn-secondary-hover)] text-[var(--color-btn-secondary-text)] font-semibold py-4 rounded-xl transition-all disabled:opacity-50"
                 >
                   Back
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleComplete}
                   disabled={!name.trim() || saving}
                   className="flex-2 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] font-semibold py-4 px-8 rounded-xl transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 shadow-lg shadow-[var(--shadow-primary)] flex items-center justify-center gap-2"
@@ -206,7 +209,7 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
                   ) : (
                     <span>Get Started</span>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           )}

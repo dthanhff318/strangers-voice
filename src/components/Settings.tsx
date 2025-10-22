@@ -9,6 +9,7 @@ import {
   Mail,
 } from "lucide-react";
 import { Switch } from "./ui/switch";
+import { Button } from "./ui/button";
 import {
   Select,
   SelectContent,
@@ -56,8 +57,9 @@ export function Settings() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
+                  <Button
                     onClick={() => setTheme("dark")}
+                    size="icon"
                     className={`p-2 rounded-lg transition-colors ${
                       theme === "dark"
                         ? "bg-[var(--color-btn-primary)] text-[var(--color-btn-primary-text)]"
@@ -65,9 +67,10 @@ export function Settings() {
                     }`}
                   >
                     <Moon className="w-4 h-4" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => setTheme("light")}
+                    size="icon"
                     className={`p-2 rounded-lg transition-colors ${
                       theme === "light"
                         ? "bg-[var(--color-btn-primary)] text-[var(--color-btn-primary-text)]"
@@ -75,7 +78,7 @@ export function Settings() {
                     }`}
                   >
                     <Sun className="w-4 h-4" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -240,23 +243,25 @@ export function Settings() {
                 <p className="text-sm font-medium text-[var(--color-text-primary)]">
                   Terms of Service
                 </p>
-                <button
+                <Button
+                  variant="link"
                   onClick={() => setShowTerms(true)}
                   className="text-sm text-[var(--color-accent-primary)] hover:underline"
                 >
                   View
-                </button>
+                </Button>
               </div>
               <div className="flex items-center justify-between py-2">
                 <p className="text-sm font-medium text-[var(--color-text-primary)]">
                   Privacy Policy
                 </p>
-                <button
+                <Button
+                  variant="link"
                   onClick={() => setShowPrivacy(true)}
                   className="text-sm text-[var(--color-accent-primary)] hover:underline"
                 >
                   View
-                </button>
+                </Button>
               </div>
             </div>
           </div>

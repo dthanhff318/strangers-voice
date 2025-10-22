@@ -101,6 +101,51 @@ export interface Database {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          id: string
+          created_at: string
+          recording_id: string
+          user_id: string
+          reasons: string[]
+          additional_info: string | null
+          status: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          recording_id: string
+          user_id: string
+          reasons: string[]
+          additional_info?: string | null
+          status?: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          recording_id?: string
+          user_id?: string
+          reasons?: string[]
+          additional_info?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "recordings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

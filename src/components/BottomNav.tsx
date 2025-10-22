@@ -1,6 +1,7 @@
 import { Home, Users, Mic, User, Settings } from 'lucide-react'
+import { Button } from './ui/button'
 
-type NavTab = 'home' | 'follow' | 'profile' | 'settings'
+type NavTab = 'home' | 'follow' | 'profile' | 'settings' | 'admin'
 
 interface BottomNavProps {
   activeTab: NavTab
@@ -19,9 +20,10 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
         <div className="max-w-4xl mx-auto px-4">
           <div className="relative flex items-end justify-between py-3 px-2">
             {/* Home Button */}
-            <button
+            <Button
+              variant="ghost"
               onClick={() => onTabChange('home')}
-              className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 ${
+              className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 h-auto ${
                 activeTab === 'home'
                   ? 'text-[var(--color-text-primary)]'
                   : 'text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]'
@@ -39,12 +41,13 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
               }`}>
                 Home
               </span>
-            </button>
+            </Button>
 
             {/* Follow Button */}
-            <button
+            <Button
+              variant="ghost"
               onClick={() => onTabChange('follow')}
-              className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 ${
+              className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 h-auto ${
                 activeTab === 'follow'
                   ? 'text-[var(--color-text-primary)]'
                   : 'text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]'
@@ -62,12 +65,13 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
               }`}>
                 Follow
               </span>
-            </button>
+            </Button>
 
             {/* Record Button (Center, Large) */}
-            <button
+            <Button
+              variant="ghost"
               onClick={onRecordClick}
-              className="group flex flex-col items-center gap-0.5 -mt-6 transition-all duration-300"
+              className="group flex flex-col items-center gap-0.5 -mt-6 transition-all duration-300 h-auto p-0 hover:bg-transparent"
             >
               <div className="relative">
                 {/* Glow effect */}
@@ -81,12 +85,13 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
               <span className="text-xs font-medium text-[var(--color-text-primary)] mt-1 group-hover:scale-105 transition-transform duration-300">
                 Record
               </span>
-            </button>
+            </Button>
 
             {/* Profile Button */}
-            <button
+            <Button
+              variant="ghost"
               onClick={() => onTabChange('profile')}
-              className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 ${
+              className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 h-auto ${
                 activeTab === 'profile'
                   ? 'text-[var(--color-text-primary)]'
                   : 'text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]'
@@ -104,12 +109,13 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
               }`}>
                 Profile
               </span>
-            </button>
+            </Button>
 
             {/* Settings Button */}
-            <button
+            <Button
+              variant="ghost"
               onClick={() => onTabChange('settings')}
-              className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 ${
+              className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 h-auto ${
                 activeTab === 'settings'
                   ? 'text-[var(--color-text-primary)]'
                   : 'text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]'
@@ -127,7 +133,7 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
               }`}>
                 Settings
               </span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>

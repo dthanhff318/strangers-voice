@@ -5,11 +5,22 @@ import { supabase } from "../lib/supabase";
 import { deleteRecord } from "../lib/edgeFunctions";
 import { toast } from "sonner";
 import WaveSurfer from "wavesurfer.js";
-import { Flame, MessageCircle, Play, Pause, Flag, Trash2, Loader2, X, Minimize2, Maximize2 } from "lucide-react";
+import {
+  Flame,
+  Play,
+  Pause,
+  Flag,
+  Trash2,
+  Loader2,
+  X,
+  Minimize2,
+  Maximize2,
+} from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useAudioPlayer } from "../contexts/AudioPlayerContext";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { UserProfileModal } from "./UserProfileModal";
+import { ReportForm } from "./ReportForm";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -19,14 +30,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import { Button } from "./ui/button";
 
 interface RecordPlayerModalProps {
   onLoginRequired?: () => void;
 }
 
-export function RecordPlayerModal({
-  onLoginRequired,
-}: RecordPlayerModalProps) {
+export function RecordPlayerModal({ onLoginRequired }: RecordPlayerModalProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const {
@@ -42,10 +52,10 @@ export function RecordPlayerModal({
 
   const [userLike, setUserLike] = useState<boolean | null>(null);
   const [likesCount, setLikesCount] = useState(recording?.likes_count || 0);
-  const [dislikesCount, setDislikesCount] = useState(recording?.dislikes_count || 0);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showReportForm, setShowReportForm] = useState(false);
   const waveformRef = useRef<HTMLDivElement>(null);
 
   // Initialize WaveSurfer only once
@@ -54,9 +64,8 @@ export function RecordPlayerModal({
       return;
     }
 
-    // Update likes/dislikes when recording changes
+    // Update likes when recording changes
     setLikesCount(recording.likes_count);
-    setDislikesCount(recording.dislikes_count);
 
     // Wait for DOM to be ready
     const timer = setTimeout(() => {
@@ -71,15 +80,18 @@ export function RecordPlayerModal({
       try {
         const wavesurfer = WaveSurfer.create({
           container: waveformRef.current,
-          waveColor: getComputedStyle(document.documentElement)
-            .getPropertyValue("--color-wave-bg")
-            .trim() || "#808080",
-          progressColor: getComputedStyle(document.documentElement)
-            .getPropertyValue("--color-wave-progress")
-            .trim() || "#ffffff",
-          cursorColor: getComputedStyle(document.documentElement)
-            .getPropertyValue("--color-accent-primary")
-            .trim() || "#0066ff",
+          waveColor:
+            getComputedStyle(document.documentElement)
+              .getPropertyValue("--color-wave-bg")
+              .trim() || "#808080",
+          progressColor:
+            getComputedStyle(document.documentElement)
+              .getPropertyValue("--color-wave-progress")
+              .trim() || "#ffffff",
+          cursorColor:
+            getComputedStyle(document.documentElement)
+              .getPropertyValue("--color-accent-primary")
+              .trim() || "#0066ff",
           barWidth: 2,
           barGap: 1,
           barRadius: 2,
@@ -132,7 +144,7 @@ export function RecordPlayerModal({
     }
   };
 
-  const handleLike = async (isLike: boolean) => {
+  const handleLike = async () => {
     if (!user) {
       onLoginRequired?.();
       return;
@@ -141,7 +153,8 @@ export function RecordPlayerModal({
     if (!recording) return;
 
     try {
-      if (userLike === isLike) {
+      // If already liked, unlike it
+      if (userLike === true) {
         await supabase
           .from("likes")
           .delete()
@@ -149,43 +162,20 @@ export function RecordPlayerModal({
           .eq("user_id", user.id);
 
         setUserLike(null);
-        if (isLike) {
-          setLikesCount((prev) => prev - 1);
-        } else {
-          setDislikesCount((prev) => prev - 1);
-        }
+        setLikesCount((prev) => prev - 1);
         return;
       }
 
-      if (userLike !== null) {
-        await supabase
-          .from("likes")
-          .update({ is_like: isLike })
-          .eq("recording_id", recording.id)
-          .eq("user_id", user.id);
+      // If not liked yet, add like
+      if (userLike === null) {
+        await supabase.from("likes").insert({
+          recording_id: recording.id,
+          user_id: user.id,
+          is_like: true,
+        });
 
-        setUserLike(isLike);
-        if (isLike) {
-          setLikesCount((prev) => prev + 1);
-          setDislikesCount((prev) => prev - 1);
-        } else {
-          setLikesCount((prev) => prev - 1);
-          setDislikesCount((prev) => prev + 1);
-        }
-        return;
-      }
-
-      await supabase.from("likes").insert({
-        recording_id: recording.id,
-        user_id: user.id,
-        is_like: isLike,
-      });
-
-      setUserLike(isLike);
-      if (isLike) {
+        setUserLike(true);
         setLikesCount((prev) => prev + 1);
-      } else {
-        setDislikesCount((prev) => prev + 1);
       }
     } catch (error) {
       console.error("Error updating like:", error);
@@ -200,7 +190,7 @@ export function RecordPlayerModal({
       const { error } = await deleteRecord(recording.id);
       if (error) throw error;
 
-      toast.success('Recording deleted successfully');
+      toast.success("Recording deleted successfully");
 
       // Invalidate queries to refresh the feed
       queryClient.invalidateQueries({ queryKey: ["trending-recordings"] });
@@ -209,11 +199,19 @@ export function RecordPlayerModal({
       setShowDeleteDialog(false);
       handleClose();
     } catch (error) {
-      console.error('Error deleting recording:', error);
-      toast.error('Failed to delete recording. Please try again.');
+      console.error("Error deleting recording:", error);
+      toast.error("Failed to delete recording. Please try again.");
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  const handleReport = () => {
+    if (!user) {
+      onLoginRequired?.();
+      return;
+    }
+    setShowReportForm(true);
   };
 
   const handleMinimize = () => {
@@ -281,9 +279,21 @@ export function RecordPlayerModal({
         }
       >
         {/* Header - Always visible */}
-        <div className={`flex items-center justify-between ${isMiniMode ? 'p-2' : 'p-3'} ${!isMiniMode ? 'border-b border-[var(--color-border)]' : ''}`}>
-          <div className={`flex items-center ${isMiniMode ? 'gap-2' : 'gap-3'} flex-1 min-w-0`}>
-            <Avatar className={`${isMiniMode ? 'w-8 h-8' : 'w-10 h-10'} flex-shrink-0`}>
+        <div
+          className={`flex items-center justify-between ${
+            isMiniMode ? "p-2" : "p-3"
+          } ${!isMiniMode ? "border-b border-[var(--color-border)]" : ""}`}
+        >
+          <div
+            className={`flex items-center ${
+              isMiniMode ? "gap-2" : "gap-3"
+            } flex-1 min-w-0`}
+          >
+            <Avatar
+              className={`${
+                isMiniMode ? "w-8 h-8" : "w-10 h-10"
+              } flex-shrink-0`}
+            >
               <AvatarImage
                 src={recording.profiles?.avatar_url || ""}
                 alt={recording.profiles?.full_name || ""}
@@ -294,10 +304,18 @@ export function RecordPlayerModal({
             </Avatar>
 
             <div className="flex-1 min-w-0">
-              <h3 className={`font-semibold text-[var(--color-text-primary)] ${isMiniMode ? 'text-xs' : 'text-sm'} truncate`}>
+              <h3
+                className={`font-semibold text-[var(--color-text-primary)] ${
+                  isMiniMode ? "text-xs" : "text-sm"
+                } truncate`}
+              >
                 {recording.title || "Untitled"}
               </h3>
-              <p className={`text-[var(--color-text-tertiary)] ${isMiniMode ? 'text-[10px]' : 'text-xs'} truncate`}>
+              <p
+                className={`text-[var(--color-text-tertiary)] ${
+                  isMiniMode ? "text-[10px]" : "text-xs"
+                } truncate`}
+              >
                 {recording.profiles?.full_name || "Unknown"}
               </p>
             </div>
@@ -305,52 +323,67 @@ export function RecordPlayerModal({
 
           <div className="flex items-center gap-1">
             {isMiniMode ? (
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={handleExpand}
                 className="p-1.5 rounded-lg hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all"
                 title="Expand"
               >
                 <Maximize2 className="w-4 h-4" />
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={handleMinimize}
                 className="p-1.5 rounded-lg hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all"
                 title="Minimize"
               >
                 <Minimize2 className="w-4 h-4" />
-              </button>
+              </Button>
             )}
 
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={handleClose}
               className="p-1.5 rounded-lg hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all"
               title="Close"
             >
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Player Controls - Always visible */}
-        <div className={isMiniMode ? 'px-2 pb-2' : 'p-3'}>
-          <div className={`flex items-center ${isMiniMode ? 'gap-2' : 'gap-3'}`}>
-            <button
+        <div className={isMiniMode ? "px-2 pb-2" : "p-3"}>
+          <div
+            className={`flex items-center ${isMiniMode ? "gap-2" : "gap-3"}`}
+          >
+            <Button
+              size={isMiniMode ? "icon-sm" : "icon"}
               onClick={togglePlayPause}
-              className={`${isMiniMode ? 'w-8 h-8' : 'w-10 h-10'} rounded-full bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] flex items-center justify-center transition-all hover:scale-105 shadow-md shadow-[var(--shadow-primary)] flex-shrink-0`}
+              className={`${
+                isMiniMode ? "w-8 h-8" : "w-10 h-10"
+              } rounded-full bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] flex items-center justify-center transition-all hover:scale-105 shadow-md shadow-[var(--shadow-primary)] flex-shrink-0`}
             >
               {globalIsPlaying ? (
                 <Pause
-                  className={`${isMiniMode ? 'w-3 h-3' : 'w-4 h-4'} text-[var(--color-btn-primary-text)]`}
+                  className={`${
+                    isMiniMode ? "w-3 h-3" : "w-4 h-4"
+                  } text-[var(--color-btn-primary-text)]`}
                   fill="var(--color-btn-primary-text)"
                 />
               ) : (
                 <Play
-                  className={`${isMiniMode ? 'w-3 h-3' : 'w-4 h-4'} text-[var(--color-btn-primary-text)] ml-0.5`}
+                  className={`${
+                    isMiniMode ? "w-3 h-3" : "w-4 h-4"
+                  } text-[var(--color-btn-primary-text)] ml-0.5`}
                   fill="var(--color-btn-primary-text)"
                 />
               )}
-            </button>
+            </Button>
 
             <div
               ref={waveformRef}
@@ -363,70 +396,67 @@ export function RecordPlayerModal({
         {/* Full Mode Details */}
         {!isMiniMode && (
           <div className="p-6 pt-0 space-y-4">
-              {/* Duration */}
-              <div className="text-[var(--color-text-tertiary)] text-sm">
-                {formatDuration(recording.duration)}
+            {/* Duration */}
+            <div className="text-[var(--color-text-tertiary)] text-sm">
+              {formatDuration(recording.duration)}
+            </div>
+
+            {/* Description */}
+            {recording.description && (
+              <p className="text-[var(--color-text-secondary)] text-sm">
+                {recording.description}
+              </p>
+            )}
+
+            {/* Stats & Actions */}
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center gap-6">
+                <Button
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLike();
+                  }}
+                  className={`flex items-center gap-2 transition-colors p-0 h-auto ${
+                    userLike === true
+                      ? "text-[var(--color-text-primary)]"
+                      : "text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
+                  }`}
+                >
+                  <Flame
+                    className="w-6 h-6"
+                    fill={userLike === true ? "currentColor" : "none"}
+                  />
+                  <span className="text-base font-medium">
+                    {formatCount(likesCount)}
+                  </span>
+                </Button>
               </div>
 
-              {/* Description */}
-              {recording.description && (
-                <p className="text-[var(--color-text-secondary)] text-sm">
-                  {recording.description}
-                </p>
-              )}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleReport}
+                  className="p-2 rounded-lg hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all"
+                  title="Report"
+                >
+                  <Flag className="w-5 h-5" />
+                </Button>
 
-              {/* Stats & Actions */}
-              <div className="flex items-center justify-between pt-2">
-                <div className="flex items-center gap-6">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLike(true);
-                    }}
-                    className={`flex items-center gap-2 transition-colors ${
-                      userLike === true
-                        ? "text-[var(--color-text-primary)]"
-                        : "text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
-                    }`}
+                {user && recording.user_id === user.id && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="p-2 rounded-lg hover:bg-red-600/10 text-red-600 hover:text-red-700 transition-all"
+                    title="Delete"
                   >
-                    <Flame
-                      className="w-6 h-6"
-                      fill={userLike === true ? "currentColor" : "none"}
-                    />
-                    <span className="text-base font-medium">{formatCount(likesCount)}</span>
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLike(false);
-                    }}
-                    className="flex items-center gap-2 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors"
-                  >
-                    <MessageCircle className="w-6 h-6" />
-                    <span className="text-base font-medium">{formatCount(dislikesCount)}</span>
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    disabled
-                    className="p-2 rounded-lg opacity-50 cursor-not-allowed text-[var(--color-text-tertiary)]"
-                    title="Report"
-                  >
-                    <Flag className="w-5 h-5" />
-                  </button>
-
-                  {user && recording.user_id === user.id && (
-                    <button
-                      onClick={() => setShowDeleteDialog(true)}
-                      className="p-2 rounded-lg hover:bg-red-600/10 text-red-600 hover:text-red-700 transition-all"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  )}
-                </div>
+                    <Trash2 className="w-5 h-5" />
+                  </Button>
+                )}
               </div>
+            </div>
           </div>
         )}
       </div>
@@ -452,7 +482,8 @@ export function RecordPlayerModal({
               Delete Recording
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[var(--color-text-secondary)]">
-              Are you sure you want to delete this recording? This action cannot be undone.
+              Are you sure you want to delete this recording? This action cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -462,7 +493,8 @@ export function RecordPlayerModal({
             >
               Cancel
             </AlertDialogCancel>
-            <button
+            <Button
+              variant="destructive"
               type="button"
               onClick={confirmDelete}
               disabled={isDeleting}
@@ -476,10 +508,20 @@ export function RecordPlayerModal({
               ) : (
                 "Delete"
               )}
-            </button>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Report Form */}
+      {user && (
+        <ReportForm
+          isOpen={showReportForm}
+          onClose={() => setShowReportForm(false)}
+          recordingId={recording.id}
+          userId={user.id}
+        />
+      )}
     </>
   );
 }

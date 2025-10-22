@@ -70,7 +70,9 @@ export function UserProfileModal({
           {/* Cover Background with Gradient */}
           <div className="relative h-28 bg-gradient-to-br from-[var(--color-bg-elevated)] via-[var(--color-bg-card-hover)] to-[var(--color-bg-elevated)]">
             {/* Close Button */}
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={(e) => {
                 e.stopPropagation();
                 onClose();
@@ -78,7 +80,7 @@ export function UserProfileModal({
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm flex items-center justify-center transition-all z-10"
             >
               <X className="w-4 h-4 text-white" />
-            </button>
+            </Button>
 
             {/* Subtle Pattern Overlay */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.03),transparent_50%)]" />

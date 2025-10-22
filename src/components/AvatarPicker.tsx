@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { X, Loader2 } from 'lucide-react'
+import { Button } from './ui/button'
 
 interface AvatarPickerProps {
   isOpen: boolean
@@ -62,12 +63,14 @@ export function AvatarPicker({ isOpen, onClose, onSelect, currentAvatar, saving 
           <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">
             Choose Your Avatar
           </h2>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
             className="w-10 h-10 rounded-full bg-[var(--color-bg-card-hover)] hover:bg-[var(--color-bg-elevated)] flex items-center justify-center transition-colors"
           >
             <X className="w-5 h-5 text-[var(--color-text-primary)]" />
-          </button>
+          </Button>
         </div>
 
         {/* Avatar Grid */}
@@ -78,11 +81,12 @@ export function AvatarPicker({ isOpen, onClose, onSelect, currentAvatar, saving 
               const isSelected = selectedAvatarUrl.includes(seed)
 
               return (
-                <button
+                <Button
                   key={seed}
                   onClick={() => handleSelect(seed)}
                   disabled={saving}
-                  className={`relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  variant="ghost"
+                  className={`relative aspect-square rounded-xl overflow-hidden transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed p-0 ${
                     isSelected
                       ? 'ring-4 ring-[var(--color-btn-primary)] scale-105'
                       : 'ring-2 ring-[var(--color-border)] hover:ring-[var(--color-text-tertiary)]'
@@ -101,7 +105,7 @@ export function AvatarPicker({ isOpen, onClose, onSelect, currentAvatar, saving 
                       </div>
                     </div>
                   )}
-                </button>
+                </Button>
               )
             })}
           </div>
@@ -113,14 +117,15 @@ export function AvatarPicker({ isOpen, onClose, onSelect, currentAvatar, saving 
             Powered by <a href="https://www.dicebear.com" target="_blank" rel="noopener noreferrer" className="text-[var(--color-text-primary)] hover:underline">DiceBear</a>
           </p>
           <div className="flex items-center gap-3">
-            <button
+            <Button
+              variant="outline"
               onClick={onClose}
               disabled={saving}
               className="px-6 py-2 bg-[var(--color-bg-elevated)] hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-primary)] hover:text-[var(--color-text-primary)] rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleUpdate}
               disabled={saving || selectedAvatarUrl === currentAvatar}
               className="px-6 py-2 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
@@ -133,7 +138,7 @@ export function AvatarPicker({ isOpen, onClose, onSelect, currentAvatar, saving 
               ) : (
                 'Update'
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

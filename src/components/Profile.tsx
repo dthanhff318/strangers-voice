@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { getMyRecordings, updateUserInfo } from '../lib/edgeFunctions'
 import { Camera, Edit2, Save, X, Loader2, User as UserIcon, Mic } from 'lucide-react'
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
+import { Button } from './ui/button'
 import { AvatarPicker } from './AvatarPicker'
 import { CompactAudioCard } from './CompactAudioCard'
 import { toast } from 'sonner'
@@ -75,12 +76,12 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
         <p className="text-[var(--color-text-tertiary)] max-w-sm mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
           Create your profile, customize your avatar, and connect with the community
         </p>
-        <button
+        <Button
           onClick={onLoginRequired}
           className="bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] px-8 py-4 rounded-xl font-semibold transition-all hover:scale-105 shadow-lg shadow-[var(--shadow-primary)] animate-in zoom-in duration-500 delay-400"
         >
           Sign in with Google
-        </button>
+        </Button>
       </div>
     )
   }
@@ -181,7 +182,8 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
                       placeholder="Enter your name"
                       className="flex-1 px-3 py-1.5 bg-[var(--color-bg-input)] border border-[var(--color-border-light)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-border-focus)] transition-colors"
                     />
-                    <button
+                    <Button
+                      size="icon-sm"
                       onClick={handleSave}
                       disabled={saving}
                       className="p-1.5 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] rounded-lg transition-all disabled:opacity-50"
@@ -192,28 +194,32 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
                       ) : (
                         <Save className="w-4 h-4" />
                       )}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
                       onClick={handleCancel}
                       disabled={saving}
                       className="p-1.5 bg-[var(--color-bg-elevated)] hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-secondary)] rounded-lg transition-all disabled:opacity-50"
                       title="Cancel"
                     >
                       <X className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 group/name">
                     <p className="text-lg font-bold text-[var(--color-text-primary)] truncate">
                       {profile?.full_name || 'Anonymous User'}
                     </p>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => setIsEditing(true)}
                       className="p-1 rounded-md hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all opacity-0 group-hover/name:opacity-100"
                       title="Edit name"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>

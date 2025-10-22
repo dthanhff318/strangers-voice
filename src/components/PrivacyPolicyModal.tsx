@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Button } from "./ui/button";
 
 interface PrivacyPolicyModalProps {
   isOpen: boolean;
@@ -145,12 +146,12 @@ export function PrivacyPolicyModal({
         </div>
 
         <div className="mt-6 pt-4 border-t border-[var(--color-border)] flex justify-end">
-          <button
+          <Button
             onClick={onClose}
             className="px-6 py-2 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] rounded-lg font-medium transition-colors"
           >
             I Understand
-          </button>
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
