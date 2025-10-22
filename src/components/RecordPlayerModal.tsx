@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { deleteRecord } from "../lib/edgeFunctions";
 import { toast } from "sonner";
@@ -19,45 +20,24 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 
-interface Recording {
-  id: string;
-  created_at: string;
-  file_url: string;
-  duration: number;
-  likes_count: number;
-  dislikes_count: number;
-  user_id: string | null;
-  title: string | null;
-  description: string | null;
-  profiles?: {
-    id: string;
-    full_name: string | null;
-    avatar_url: string | null;
-  } | null;
-}
-
 interface RecordPlayerModalProps {
-  recording: Recording | null;
-  isOpen: boolean;
-  onClose: () => void;
   onLoginRequired?: () => void;
-  onDelete?: () => void;
 }
 
 export function RecordPlayerModal({
-  recording,
-  isOpen,
-  onClose,
   onLoginRequired,
-  onDelete
 }: RecordPlayerModalProps) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const {
+    currentRecording: recording,
+    isModalOpen: isOpen,
     isMiniMode,
     setIsMiniMode,
     wavesurferRef: globalWavesurferRef,
     isPlaying: globalIsPlaying,
     setIsPlaying: setGlobalIsPlaying,
+    close: closeModal,
   } = useAudioPlayer();
 
   const [userLike, setUserLike] = useState<boolean | null>(null);
@@ -221,7 +201,11 @@ export function RecordPlayerModal({
       if (error) throw error;
 
       toast.success('Recording deleted successfully');
-      onDelete?.();
+
+      // Invalidate queries to refresh the feed
+      queryClient.invalidateQueries({ queryKey: ["trending-recordings"] });
+      queryClient.invalidateQueries({ queryKey: ["user-recordings"] });
+
       setShowDeleteDialog(false);
       handleClose();
     } catch (error) {
@@ -241,13 +225,7 @@ export function RecordPlayerModal({
   };
 
   const handleClose = () => {
-    if (globalWavesurferRef.current) {
-      globalWavesurferRef.current.destroy();
-      globalWavesurferRef.current = null;
-    }
-    setIsMiniMode(false);
-    setGlobalIsPlaying(false);
-    onClose();
+    closeModal();
   };
 
   const formatDuration = (seconds: number) => {
@@ -275,7 +253,8 @@ export function RecordPlayerModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 z-50"
+            className="fixed inset-0 bg-black/50"
+            style={{ zIndex: 50 }}
             onClick={handleClose}
           />
         )}
@@ -283,19 +262,21 @@ export function RecordPlayerModal({
 
       {/* Player Modal */}
       <div
-        className="fixed bg-[var(--color-bg-card)] rounded-xl shadow-2xl border border-[var(--color-border)] overflow-hidden z-50"
+        className="fixed bg-[var(--color-bg-card)] rounded-xl shadow-2xl border border-[var(--color-border)] overflow-hidden"
         style={
           isMiniMode
             ? {
-                bottom: 80,
+                bottom: 96,
                 right: 16,
                 width: 320,
+                zIndex: 45, // Lower z-index for mini mode to stay above content but below modals
               }
             : {
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
                 width: "min(672px, calc(100vw - 2rem))",
+                zIndex: 51, // Higher z-index for full mode to stay above backdrop
               }
         }
       >

@@ -23,6 +23,7 @@ import {
 import { Profile } from "./components/Profile";
 import { Follow } from "./components/Follow";
 import { Settings } from "./components/Settings";
+import { RecordPlayerModal } from "./components/RecordPlayerModal";
 import { useAuth } from "./contexts/AuthContext";
 import { LogOut, User } from "lucide-react";
 import "./App.css";
@@ -200,6 +201,9 @@ function App() {
 
       {/* Toast Notifications */}
       <Toaster />
+
+      {/* Global Record Player Modal */}
+      <RecordPlayerModal onLoginRequired={() => setShowLoginModal(true)} />
     </div>
   );
 }

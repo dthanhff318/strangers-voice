@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useAudioPlayer } from "../contexts/AudioPlayerContext";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { UserProfileModal } from "./UserProfileModal";
-import { RecordPlayerModal } from "./RecordPlayerModal";
 
 interface Recording {
   id: string;
@@ -27,20 +26,12 @@ interface AudioCardProps {
   onDelete?: () => void;
 }
 
-export function AudioCard({ recording, onLoginRequired, onDelete }: AudioCardProps) {
-  const { currentRecording, setCurrentRecording, setIsMiniMode } = useAudioPlayer();
+export function AudioCard({ recording }: AudioCardProps) {
+  const { openInModal } = useAudioPlayer();
   const [showUserProfile, setShowUserProfile] = useState(false);
-  const [showPlayerModal, setShowPlayerModal] = useState(false);
 
   const handleCardClick = () => {
-    setCurrentRecording(recording);
-    setShowPlayerModal(true);
-    setIsMiniMode(false);
-  };
-
-  const handleCloseModal = () => {
-    setShowPlayerModal(false);
-    setCurrentRecording(null);
+    openInModal(recording);
   };
 
   const formatDuration = (seconds: number) => {
@@ -87,15 +78,6 @@ export function AudioCard({ recording, onLoginRequired, onDelete }: AudioCardPro
           </div>
         </div>
       </div>
-
-      {/* Record Player Modal */}
-      <RecordPlayerModal
-        recording={currentRecording}
-        isOpen={showPlayerModal}
-        onClose={handleCloseModal}
-        onLoginRequired={onLoginRequired}
-        onDelete={onDelete}
-      />
 
       {/* User Profile Modal */}
       {recording.profiles && (

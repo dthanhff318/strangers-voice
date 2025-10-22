@@ -23,6 +23,7 @@ interface AudioPlayerContextType {
   currentRecording: Recording | null;
   isPlaying: boolean;
   isMiniMode: boolean;
+  isModalOpen: boolean;
   playbackPosition: number;
   wavesurferRef: React.MutableRefObject<WaveSurfer | null>;
   setCurrentRecording: (recording: Recording | null) => void;
@@ -40,12 +41,14 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const [currentRecording, setCurrentRecording] = useState<Recording | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMiniMode, setIsMiniMode] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [playbackPosition, setPlaybackPosition] = useState(0);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
 
   const openInModal = (recording: Recording) => {
     setCurrentRecording(recording);
     setIsMiniMode(false);
+    setIsModalOpen(true);
   };
 
   const minimize = () => {
@@ -63,6 +66,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     }
     setCurrentRecording(null);
     setIsMiniMode(false);
+    setIsModalOpen(false);
     setIsPlaying(false);
     setPlaybackPosition(0);
   };
@@ -73,6 +77,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         currentRecording,
         isPlaying,
         isMiniMode,
+        isModalOpen,
         playbackPosition,
         wavesurferRef,
         setCurrentRecording,
