@@ -5,6 +5,7 @@ import './theme.css'
 import App from './App.tsx'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { AudioPlayerProvider } from './contexts/AudioPlayerContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Configure QueryClient with optimized caching settings
@@ -25,7 +26,9 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <App />
+          <AudioPlayerProvider>
+            <App />
+          </AudioPlayerProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
