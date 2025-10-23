@@ -71,3 +71,28 @@ export async function updateUserInfo(fullName: string, avatarUrl: string) {
 export async function updateReportStatus(reportId: string, status: string) {
   return callEdgeFunction("update-report-status", { reportId, status });
 }
+
+/**
+ * Toggle follow/unfollow a user
+ * @param userId - The ID of the user to follow/unfollow
+ * @param action - Optional: "follow" or "unfollow". If not provided, it will toggle.
+ */
+export async function toggleFollow(userId: string, action?: "follow" | "unfollow") {
+  return callEdgeFunction<{ success: boolean; message: string; isFollowing: boolean }>(
+    "toggle-follow",
+    { userId, action }
+  );
+}
+
+/**
+ * Get follow status and counts for a user
+ * @param userId - The ID of the user to check
+ * @returns Follow status, followers count, and following count
+ */
+export async function getFollowStatus(userId: string) {
+  return callEdgeFunction<{
+    isFollowing: boolean;
+    followersCount: number;
+    followingCount: number;
+  }>("get-follow-status", { userId });
+}

@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../contexts/AuthContext'
+import { useFollow } from '../hooks/useFollow'
 import { getMyRecordings, updateUserInfo } from '../lib/edgeFunctions'
-import { Camera, Edit2, Save, X, Loader2, User as UserIcon, Mic } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { Camera, Edit2, Save, X, Loader2, User as UserIcon, Mic, ArrowLeft, UserPlus, UserCheck } from 'lucide-react'
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
 import { Button } from './ui/button'
 import { AvatarPicker } from './AvatarPicker'
@@ -21,12 +24,22 @@ interface Recording {
   description: string | null
 }
 
+interface UserProfile {
+  id: string
+  full_name: string | null
+  avatar_url: string | null
+  email: string | null
+  created_at: string
+}
+
 interface ProfileProps {
   onLoginRequired?: () => void
 }
 
 export function Profile({ onLoginRequired }: ProfileProps = {}) {
-  const { user, profile, refreshProfile } = useAuth()
+  const { userId } = useParams<{ userId: string }>()
+  const navigate = useNavigate()
+  const { user, profile: currentUserProfile, refreshProfile } = useAuth()
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -35,36 +48,94 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
   const [name, setName] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
 
+  // Determine if viewing own profile or someone else's
+  const isOwnProfile = !userId || userId === user?.id
+  const targetUserId = userId || user?.id
+
+  // Fetch profile data (for other users)
+  const {
+    data: otherUserProfile,
+    isLoading: loadingProfile,
+  } = useQuery<UserProfile | null>({
+    queryKey: ['user-profile', userId],
+    queryFn: async () => {
+      if (!userId) return null
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (error) throw error
+      return data as UserProfile
+    },
+    enabled: !!userId && userId !== user?.id,
+  })
+
+  // Use the appropriate profile based on whether it's own or other user's
+  const profile: UserProfile | null = isOwnProfile
+    ? (currentUserProfile as UserProfile | null)
+    : (otherUserProfile ?? null)
+
+  // Use follow hook to get follow status and counts
+  // Always fetch (even for own profile) to get followers/following counts
+  const {
+    isFollowing,
+    isLoading: loadingFollowStatus,
+    isToggling,
+    followersCount,
+    followingCount,
+    handleToggleFollow
+  } = useFollow(targetUserId, !!targetUserId) // Always enabled if userId exists
+
   // Initialize form values from profile
   useEffect(() => {
-    if (profile) {
-      setName(profile.full_name || '')
-      setAvatarUrl(profile.avatar_url || `https://api.dicebear.com/9.x/micah/svg?seed=${user?.id || 'default'}`)
+    if (isOwnProfile && currentUserProfile) {
+      setName(currentUserProfile.full_name || '')
+      setAvatarUrl(currentUserProfile.avatar_url || `https://api.dicebear.com/9.x/micah/svg?seed=${user?.id || 'default'}`)
     }
-  }, [profile, user])
+  }, [currentUserProfile, user, isOwnProfile])
 
-  // Use React Query for fetching user's recordings with caching
+  // Use React Query for fetching recordings with caching
   const {
     data: recordings = [],
     isLoading: loadingRecordings,
   } = useQuery<Recording[]>({
-    queryKey: ['my-recordings', user?.id],
+    queryKey: ['user-recordings', targetUserId],
     queryFn: async () => {
-      if (!user) return []
-      const { data, error: fetchError } = await getMyRecordings()
-      if (fetchError) throw fetchError
-      return (data?.data || []) as Recording[]
+      if (!targetUserId) return []
+
+      // If viewing own profile, use edge function
+      if (isOwnProfile) {
+        const { data, error: fetchError } = await getMyRecordings()
+        if (fetchError) throw fetchError
+        return (data?.data || []) as Recording[]
+      }
+
+      // If viewing other user's profile, fetch directly
+      const { data, error } = await supabase
+        .from('recordings')
+        .select('*')
+        .eq('user_id', targetUserId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return (data || []) as Recording[]
     },
-    enabled: !!user, // Only fetch when user is logged in
+    enabled: !!targetUserId,
   })
 
   // Refresh recordings on delete
   const handleDeleteRecording = () => {
-    queryClient.invalidateQueries({ queryKey: ['my-recordings', user?.id] })
+    queryClient.invalidateQueries({ queryKey: ['user-recordings', targetUserId] })
   }
 
-  // If not logged in, show login prompt
-  if (!user) {
+  const handleBack = () => {
+    navigate(-1)
+  }
+
+  // If not logged in and trying to view own profile, show login prompt
+  if (!user && !userId) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center text-center animate-in fade-in duration-500 px-4">
         <div className="w-24 h-24 mx-auto mb-6 bg-[var(--color-bg-card)] rounded-full flex items-center justify-center animate-in zoom-in duration-700 delay-100">
@@ -82,6 +153,25 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
         >
           Sign in with Google
         </Button>
+      </div>
+    )
+  }
+
+  // Loading state for other user's profile
+  if (!isOwnProfile && loadingProfile) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-text-tertiary)]" />
+      </div>
+    )
+  }
+
+  // Not found state for other user's profile
+  if (!isOwnProfile && !profile) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center">
+        <p className="text-[var(--color-text-tertiary)] mb-4">User not found</p>
+        <Button onClick={handleBack}>Go Back</Button>
       </div>
     )
   }
@@ -145,35 +235,60 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
   return (
     <div className="min-h-[70vh] animate-in fade-in duration-500">
       <div className="max-w-2xl mx-auto">
+        {/* Back Button for other user's profile */}
+        {!isOwnProfile && (
+          <Button
+            variant="ghost"
+            onClick={handleBack}
+            className="mb-4 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card)]"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+        )}
+
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[var(--color-text-primary)]">My Profile</h1>
+          <h1 className="text-3xl font-bold text-[var(--color-text-primary)]">
+            {isOwnProfile ? 'My Profile' : profile?.full_name || 'User Profile'}
+          </h1>
         </div>
 
         {/* Profile Card */}
         <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-5">
           <div className="flex items-start gap-4">
             {/* Avatar */}
-            <div className="relative flex-shrink-0 cursor-pointer group" onClick={handleAvatarClick}>
-              <Avatar className="w-16 h-16">
-                <AvatarImage src={avatarUrl} alt="Profile" className="group-hover:opacity-60 transition-opacity" />
+            {isOwnProfile ? (
+              <div className="relative flex-shrink-0 cursor-pointer group" onClick={handleAvatarClick}>
+                <Avatar className="w-16 h-16">
+                  <AvatarImage src={avatarUrl} alt="Profile" className="group-hover:opacity-60 transition-opacity" />
+                  <AvatarFallback className="bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
+                    {profile?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                  <Camera className="w-5 h-5 text-[var(--color-text-primary)]" />
+                </div>
+              </div>
+            ) : (
+              <Avatar className="w-16 h-16 flex-shrink-0">
+                <AvatarImage src={profile?.avatar_url || ''} alt="Profile" />
                 <AvatarFallback className="bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
                   {profile?.full_name?.charAt(0)?.toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                <Camera className="w-5 h-5 text-[var(--color-text-primary)]" />
-              </div>
-            </div>
+            )}
 
             {/* Info */}
             <div className="flex-1 min-w-0">
               {/* Name */}
               <div className="mb-3">
-                <label className="block text-xs font-medium text-[var(--color-text-tertiary)] mb-1">
-                  Display Name
-                </label>
-                {isEditing ? (
+                {isOwnProfile && (
+                  <label className="block text-xs font-medium text-[var(--color-text-tertiary)] mb-1">
+                    Display Name
+                  </label>
+                )}
+                {isOwnProfile && isEditing ? (
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
@@ -211,31 +326,81 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
                     <p className="text-lg font-bold text-[var(--color-text-primary)] truncate">
                       {profile?.full_name || 'Anonymous User'}
                     </p>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => setIsEditing(true)}
-                      className="p-1 rounded-md hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all opacity-0 group-hover/name:opacity-100"
-                      title="Edit name"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </Button>
+                    {isOwnProfile && (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => setIsEditing(true)}
+                        className="p-1 rounded-md hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all opacity-0 group-hover/name:opacity-100"
+                        title="Edit name"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* Email */}
-              <div className="mb-3">
-                <label className="block text-xs font-medium text-[var(--color-text-tertiary)] mb-1">
-                  Email
-                </label>
-                <p className="text-sm text-[var(--color-text-secondary)] truncate">{user?.email}</p>
-              </div>
+              {/* Email - Only show for own profile */}
+              {isOwnProfile && (
+                <div className="mb-3">
+                  <label className="block text-xs font-medium text-[var(--color-text-tertiary)] mb-1">
+                    Email
+                  </label>
+                  <p className="text-sm text-[var(--color-text-secondary)] truncate">{user?.email}</p>
+                </div>
+              )}
+
+              {/* Voice Creator label for other user's profile */}
+              {!isOwnProfile && (
+                <p className="text-sm text-[var(--color-text-tertiary)] mb-3">Voice Creator</p>
+              )}
 
               {/* Member Since */}
               <div className="text-xs text-[var(--color-text-muted)]">
-                Member since {new Date(user?.created_at || new Date()).toLocaleDateString()}
+                Member since {new Date(profile?.created_at || new Date()).toLocaleDateString()}
               </div>
+
+              {/* Follow Button for other user's profile */}
+              {!isOwnProfile && (
+                <div className="mt-3">
+                  {loadingFollowStatus ? (
+                    <Button disabled size="sm">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Loading...
+                    </Button>
+                  ) : isFollowing ? (
+                    <Button
+                      onClick={handleToggleFollow}
+                      disabled={isToggling}
+                      variant="outline"
+                      size="sm"
+                      className="bg-[var(--color-bg-card)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)]"
+                    >
+                      {isToggling ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <UserCheck className="w-4 h-4" />
+                      )}
+                      Following
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleToggleFollow}
+                      disabled={isToggling}
+                      size="sm"
+                      className="bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)]"
+                    >
+                      {isToggling ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <UserPlus className="w-4 h-4" />
+                      )}
+                      Follow
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -248,22 +413,26 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
               <div className="text-xs text-[var(--color-text-tertiary)]">Recordings</div>
             </div>
             <div className="text-center">
-              <div className="text-xl font-bold text-[var(--color-text-primary)]">0</div>
+              <div className="text-xl font-bold text-[var(--color-text-primary)]">
+                {loadingFollowStatus ? '-' : followersCount}
+              </div>
               <div className="text-xs text-[var(--color-text-tertiary)]">Followers</div>
             </div>
             <div className="text-center">
-              <div className="text-xl font-bold text-[var(--color-text-primary)]">0</div>
+              <div className="text-xl font-bold text-[var(--color-text-primary)]">
+                {loadingFollowStatus ? '-' : followingCount}
+              </div>
               <div className="text-xs text-[var(--color-text-tertiary)]">Following</div>
             </div>
           </div>
         </div>
 
-        {/* My Recordings Section */}
+        {/* Recordings Section */}
         <div className="mt-8">
           <div className="flex items-center gap-3 mb-4">
             <Mic className="w-5 h-5 text-[var(--color-accent-primary)]" />
             <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">
-              My Recordings
+              {isOwnProfile ? 'My Recordings' : 'Voice Recordings'}
             </h2>
           </div>
 
@@ -282,27 +451,35 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
                 No recordings yet
               </h3>
               <p className="text-[var(--color-text-tertiary)]">
-                Start recording to share your voice with the world!
+                {isOwnProfile
+                  ? 'Start recording to share your voice with the world!'
+                  : "This user hasn't shared any recordings yet"}
               </p>
             </div>
           ) : (
             <div className="space-y-3">
               {recordings.map((recording) => (
-                <CompactAudioCard key={recording.id} recording={recording} onDelete={handleDeleteRecording} />
+                <CompactAudioCard
+                  key={recording.id}
+                  recording={recording}
+                  onDelete={isOwnProfile ? handleDeleteRecording : undefined}
+                />
               ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Avatar Picker Modal */}
-      <AvatarPicker
-        isOpen={showAvatarPicker}
-        onClose={() => setShowAvatarPicker(false)}
-        onSelect={handleAvatarSelect}
-        currentAvatar={avatarUrl}
-        saving={saving}
-      />
+      {/* Avatar Picker Modal - Only for own profile */}
+      {isOwnProfile && (
+        <AvatarPicker
+          isOpen={showAvatarPicker}
+          onClose={() => setShowAvatarPicker(false)}
+          onSelect={handleAvatarSelect}
+          currentAvatar={avatarUrl}
+          saving={saving}
+        />
+      )}
     </div>
   )
 }

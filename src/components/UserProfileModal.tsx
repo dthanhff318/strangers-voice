@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { X, Mic, Loader2, UserPlus, UserCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { X, Mic, Loader2, UserPlus, UserCheck, Eye } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import { useAuth } from "../contexts/AuthContext";
+import { useFollow } from "../hooks/useFollow";
 import { Button } from "@/components/ui/button";
 
 interface UserProfile {
@@ -20,9 +23,23 @@ export function UserProfileModal({
   onClose,
   userProfile,
 }: UserProfileModalProps) {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [recordingsCount, setRecordingsCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const [isFollowing, setIsFollowing] = useState(false); // TODO: Get from backend
+
+  // Check if viewing own profile
+  const isOwnProfile = user?.id === userProfile.id;
+
+  // Use follow hook to get follow status and counts
+  // Always fetch (even for own profile) to get followers count
+  const {
+    isFollowing,
+    isLoading: loadingFollowStatus,
+    isToggling,
+    followersCount,
+    handleToggleFollow
+  } = useFollow(userProfile.id, isOpen); // Always enabled when modal is open
 
   useEffect(() => {
     if (isOpen && userProfile.id) {
@@ -110,27 +127,54 @@ export function UserProfileModal({
                 Voice Creator
               </p>
 
-              {/* Follow Button */}
-              <div className="flex gap-2 justify-center">
-                {isFollowing ? (
+              {/* Action Buttons - Only show for other users */}
+              {!isOwnProfile && (
+                <div className="flex gap-2 justify-center">
+                  {loadingFollowStatus ? (
+                    <Button disabled>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    </Button>
+                  ) : isFollowing ? (
+                    <Button
+                      onClick={handleToggleFollow}
+                      disabled={isToggling}
+                      variant="outline"
+                      className="bg-[var(--color-bg-card)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] hover:text-[var(--color-text-primary)]"
+                    >
+                      {isToggling ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <UserCheck className="w-4 h-4" />
+                      )}
+                      Following
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleToggleFollow}
+                      disabled={isToggling}
+                      className="bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)]"
+                    >
+                      {isToggling ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <UserPlus className="w-4 h-4" />
+                      )}
+                      Follow
+                    </Button>
+                  )}
                   <Button
-                    onClick={() => setIsFollowing(false)} // TODO: Add unfollow logic
+                    onClick={() => {
+                      navigate(`/profile/${userProfile.id}`);
+                      onClose();
+                    }}
                     variant="outline"
                     className="bg-[var(--color-bg-card)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] hover:text-[var(--color-text-primary)]"
                   >
-                    <UserCheck className="w-4 h-4" />
-                    Following
+                    <Eye className="w-4 h-4" />
+                    See profile
                   </Button>
-                ) : (
-                  <Button
-                    onClick={() => setIsFollowing(true)} // TODO: Add follow logic
-                    className="bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)]"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Follow
-                  </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Stats Card */}
@@ -146,18 +190,18 @@ export function UserProfileModal({
 
                 {/* Count */}
                 <div className="mb-1">
-                  {loading ? (
+                  {loading || loadingFollowStatus ? (
                     <Loader2 className="w-6 h-6 mx-auto animate-spin text-[var(--color-text-tertiary)]" />
                   ) : (
                     <div className="text-4xl font-bold text-[var(--color-text-primary)] leading-none">
-                      {recordingsCount}
+                      {isOwnProfile ? recordingsCount : followersCount}
                     </div>
                   )}
                 </div>
 
                 {/* Label */}
                 <div className="text-sm text-[var(--color-text-tertiary)]">
-                  Voice Recordings
+                  {isOwnProfile ? 'Voice Recordings' : 'Followers'}
                 </div>
               </div>
             </div>

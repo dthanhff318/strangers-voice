@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { AudioRecorder } from "./components/AudioRecorder";
 import { Feed } from "./components/Feed";
 import { BottomNav } from "./components/BottomNav";
@@ -32,13 +33,15 @@ import "./App.css";
 
 type NavTab = "home" | "follow" | "profile" | "settings" | "admin";
 
-function App() {
+function MainContent() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [showRecorder, setShowRecorder] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [activeTab, setActiveTab] = useState<NavTab>("home");
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const { user, profile, loading, signOut } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (profile && !profile.avatar_url) {
@@ -48,10 +51,26 @@ function App() {
     }
   }, [profile]);
 
+  // Sync activeTab with current route
+  useEffect(() => {
+    if (location.pathname === "/") {
+      setActiveTab("home");
+    } else if (location.pathname === "/follow") {
+      setActiveTab("follow");
+    } else if (location.pathname === "/profile") {
+      setActiveTab("profile");
+    } else if (location.pathname === "/settings") {
+      setActiveTab("settings");
+    } else if (location.pathname === "/admin") {
+      setActiveTab("admin");
+    }
+  }, [location.pathname]);
+
   const handleUploadSuccess = () => {
     setRefreshKey((prev) => prev + 1);
     setShowRecorder(false);
-    setActiveTab("home"); // Return to home after upload
+    navigate("/");
+    setActiveTab("home");
   };
 
   const handleSignOut = async () => {
@@ -60,8 +79,23 @@ function App() {
 
   const handleOnboardingComplete = async () => {
     setNeedsOnboarding(false);
-    // Refresh profile data from AuthContext
-    // The profile will be automatically refreshed via the useEffect in AuthContext
+  };
+
+  const handleTabChange = (tab: NavTab) => {
+    setActiveTab(tab);
+    const routeMap: Record<NavTab, string> = {
+      home: "/",
+      follow: "/follow",
+      profile: "/profile",
+      settings: "/settings",
+      admin: "/admin",
+    };
+    navigate(routeMap[tab]);
+  };
+
+  const handleAdminClick = () => {
+    setActiveTab("admin");
+    navigate("/admin");
   };
 
   return (
@@ -69,7 +103,7 @@ function App() {
       {/* Top Navigation */}
       <nav className="bg-[var(--color-bg-primary)]/90 backdrop-blur-sm border-b border-[var(--color-border)] sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <div className="w-8 h-8 bg-[var(--color-btn-primary)] rounded-md flex items-center justify-center">
               <img src="/favicon.png" alt="" className="w-6 h-6 logo-invert" />
             </div>
@@ -114,7 +148,7 @@ function App() {
                 <DropdownMenuSeparator className="bg-[var(--color-border)]" />
                 {profile?.email === "dthanhff318@gmail.com" && (
                   <DropdownMenuItem
-                    onClick={() => setActiveTab("admin")}
+                    onClick={handleAdminClick}
                     className="text-[var(--color-text-tertiary)] focus:bg-[var(--color-bg-elevated)] focus:text-[var(--color-text-primary)]"
                   >
                     <LayoutDashboard className="w-4 h-4" />
@@ -143,41 +177,51 @@ function App() {
       </nav>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Content based on active tab */}
-        {activeTab === "home" && (
-          <div className="animate-in fade-in duration-500">
-            <Feed
-              key={refreshKey}
-              onLoginRequired={() => setShowLoginModal(true)}
-            />
-          </div>
-        )}
-
-        {activeTab === "follow" && (
-          <div className="animate-in fade-in duration-500">
-            <Follow />
-          </div>
-        )}
-
-        {activeTab === "profile" && (
-          <Profile onLoginRequired={() => setShowLoginModal(true)} />
-        )}
-
-        {activeTab === "settings" && (
-          <div className="animate-in fade-in duration-500">
-            <Settings />
-          </div>
-        )}
-
-        {activeTab === "admin" && (
-          <Admin />
-        )}
+        {/* Routes */}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <div className="animate-in fade-in duration-500">
+                <Feed
+                  key={refreshKey}
+                  onLoginRequired={() => setShowLoginModal(true)}
+                />
+              </div>
+            }
+          />
+          <Route
+            path="/follow"
+            element={
+              <div className="animate-in fade-in duration-500">
+                <Follow />
+              </div>
+            }
+          />
+          <Route
+            path="/profile"
+            element={<Profile onLoginRequired={() => setShowLoginModal(true)} />}
+          />
+          <Route
+            path="/profile/:userId"
+            element={<Profile onLoginRequired={() => setShowLoginModal(true)} />}
+          />
+          <Route
+            path="/settings"
+            element={
+              <div className="animate-in fade-in duration-500">
+                <Settings />
+              </div>
+            }
+          />
+          <Route path="/admin" element={<Admin />} />
+        </Routes>
       </div>
 
       {/* Bottom Navigation */}
       <BottomNav
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         onRecordClick={() => {
           if (!user) {
             setShowLoginModal(true);
@@ -220,6 +264,14 @@ function App() {
       {/* Global Record Player Modal */}
       <RecordPlayerModal onLoginRequired={() => setShowLoginModal(true)} />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <MainContent />
+    </Router>
   );
 }
 

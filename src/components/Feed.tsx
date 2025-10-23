@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 import { getTrendingRecordsDashboard } from "../lib/edgeFunctions";
 import { AudioCard } from "./AudioCard";
 import { AudioLoading } from "./AudioLoading";
-import { Sparkles, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 
 interface Recording {
   id: string;
