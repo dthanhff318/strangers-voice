@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { updateReportStatus as updateReportStatusAPI } from "../lib/edgeFunctions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Button } from "./ui/button";
 import { Loader2, AudioLines, Users, Flag } from "lucide-react";
 import { toast } from "sonner";
 import { WeeklyVideosChart } from "./WeeklyVideosChart";
@@ -43,6 +45,7 @@ export function Admin() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingReports, setLoadingReports] = useState(true);
+  const [updatingReportId, setUpdatingReportId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStats();
@@ -55,7 +58,9 @@ export function Admin() {
 
       // Fetch all stats in parallel
       const [recordingsRes, profilesRes] = await Promise.all([
-        supabase.from("recordings").select("id", { count: "exact", head: true }),
+        supabase
+          .from("recordings")
+          .select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }),
       ]);
 
@@ -129,19 +134,24 @@ export function Admin() {
 
   const updateReportStatus = async (reportId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from("reports")
-        .update({ status: newStatus })
-        .eq("id", reportId);
+      setUpdatingReportId(reportId);
 
-      if (error) throw error;
+      const { error } = await updateReportStatusAPI(reportId, newStatus);
+
+      if (error) {
+        throw error;
+      }
 
       toast.success(`Report marked as ${newStatus}`);
       fetchReports();
       fetchStats();
     } catch (error) {
       console.error("Error updating report:", error);
-      toast.error("Failed to update report");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update report"
+      );
+    } finally {
+      setUpdatingReportId(null);
     }
   };
 
@@ -215,7 +225,9 @@ export function Admin() {
             ) : reports.length === 0 ? (
               <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg p-8 text-center">
                 <Flag className="w-12 h-12 text-[var(--color-text-tertiary)] mx-auto mb-3" />
-                <p className="text-[var(--color-text-secondary)]">No reports found</p>
+                <p className="text-[var(--color-text-secondary)]">
+                  No reports found
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -230,15 +242,15 @@ export function Admin() {
                           <span
                             className={`text-xs px-2 py-1 rounded-full font-medium ${
                               report.status === "pending"
-                                ? "bg-yellow-500/10 text-yellow-500"
+                                ? "bg-cyan-500/10 text-cyan-500"
                                 : report.status === "reviewed"
-                                ? "bg-blue-500/10 text-blue-500"
-                                : report.status === "resolved"
                                 ? "bg-green-500/10 text-green-500"
+                                : report.status === "resolved"
+                                ? "bg-emerald-500/10 text-emerald-500"
                                 : "bg-gray-500/10 text-gray-500"
                             }`}
                           >
-                            {report.status}
+                            {report.status.toUpperCase()}
                           </span>
                           <span className="text-xs text-[var(--color-text-tertiary)]">
                             {new Date(report.created_at).toLocaleDateString()}
@@ -247,7 +259,8 @@ export function Admin() {
 
                         <p className="text-sm text-[var(--color-text-secondary)] mb-2">
                           <span className="font-medium">Reported by:</span>{" "}
-                          {report.profile?.full_name || "Unknown"} ({report.profile?.email || "N/A"})
+                          {report.profile?.full_name || "Unknown"} (
+                          {report.profile?.email || "N/A"})
                         </p>
 
                         <p className="text-sm text-[var(--color-text-secondary)] mb-2">
@@ -285,26 +298,23 @@ export function Admin() {
 
                       <div className="flex flex-row md:flex-col gap-2">
                         {report.status === "pending" && (
-                          <>
-                            <button
-                              onClick={() => updateReportStatus(report.id, "reviewed")}
-                              className="px-3 py-1.5 text-xs bg-blue-500/10 text-blue-500 rounded hover:bg-blue-500/20 transition-colors"
-                            >
-                              Mark Reviewed
-                            </button>
-                            <button
-                              onClick={() => updateReportStatus(report.id, "resolved")}
-                              className="px-3 py-1.5 text-xs bg-green-500/10 text-green-500 rounded hover:bg-green-500/20 transition-colors"
-                            >
-                              Resolve
-                            </button>
-                            <button
-                              onClick={() => updateReportStatus(report.id, "dismissed")}
-                              className="px-3 py-1.5 text-xs bg-gray-500/10 text-gray-500 rounded hover:bg-gray-500/20 transition-colors"
-                            >
-                              Dismiss
-                            </button>
-                          </>
+                          <Button
+                            onClick={() =>
+                              updateReportStatus(report.id, "reviewed")
+                            }
+                            variant="outline"
+                            size="sm"
+                            disabled={updatingReportId === report.id}
+                          >
+                            {updatingReportId === report.id ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Updating...
+                              </>
+                            ) : (
+                              "Mark Reviewed"
+                            )}
+                          </Button>
                         )}
                       </div>
                     </div>

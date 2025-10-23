@@ -62,3 +62,12 @@ export async function deleteRecord(recordingId: string) {
 export async function updateUserInfo(fullName: string, avatarUrl: string) {
   return callEdgeFunction("update-user-info", { fullName, avatarUrl });
 }
+
+/**
+ * Update report status
+ * @param reportId - The ID of the report to update
+ * @param status - The new status (pending, reviewed, resolved, dismissed)
+ */
+export async function updateReportStatus(reportId: string, status: string) {
+  return callEdgeFunction("update-report-status", { reportId, status });
+}

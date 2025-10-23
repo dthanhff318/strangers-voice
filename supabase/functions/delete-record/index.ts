@@ -14,8 +14,8 @@ serve(async (req) => {
   }
 
   try {
-    // Create Supabase client with user's auth
-    const supabaseClient = createClient(
+    // Create Supabase client with user's auth for verification
+    const supabaseAuth = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
       {
@@ -25,11 +25,11 @@ serve(async (req) => {
       }
     );
 
-    // Get current user
+    // Get current user to verify authentication
     const {
       data: { user },
       error: userError,
-    } = await supabaseClient.auth.getUser();
+    } = await supabaseAuth.auth.getUser();
 
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -37,6 +37,12 @@ serve(async (req) => {
         status: 401,
       });
     }
+
+    // Create Supabase client with service role key for admin operations
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
 
     // Get request body
     const { recordingId } = await req.json();
@@ -51,8 +57,8 @@ serve(async (req) => {
       );
     }
 
-    // Fetch the recording to verify ownership and get file URL
-    const { data: recording, error: fetchError } = await supabaseClient
+    // Fetch the recording to verify ownership and get file URL (using service role to bypass RLS)
+    const { data: recording, error: fetchError } = await supabaseAdmin
       .from("recordings")
       .select("id, user_id, file_url")
       .eq("id", recordingId)
@@ -80,8 +86,8 @@ serve(async (req) => {
     const urlParts = recording.file_url.split("/");
     const fileName = urlParts[urlParts.length - 1];
 
-    // Delete record from database
-    const { error: dbError, count } = await supabaseClient
+    // Delete record from database using service role (bypasses RLS)
+    const { error: dbError, count } = await supabaseAdmin
       .from("recordings")
       .delete({ count: "exact" })
       .eq("id", recordingId);
@@ -107,8 +113,8 @@ serve(async (req) => {
       );
     }
 
-    // Delete file from storage only after successful database deletion
-    await supabaseClient.storage
+    // Delete file from storage only after successful database deletion (using service role)
+    await supabaseAdmin.storage
       .from("audio-recordings")
       .remove([fileName]);
 
