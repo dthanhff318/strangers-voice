@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { updateReportStatus as updateReportStatusAPI } from "../lib/edgeFunctions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -41,21 +42,17 @@ const REPORT_REASON_LABELS: Record<string, string> = {
 };
 
 export function Admin() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [reports, setReports] = useState<Report[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingReports, setLoadingReports] = useState(true);
+  const queryClient = useQueryClient();
   const [updatingReportId, setUpdatingReportId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchStats();
-    fetchReports();
-  }, []);
-
-  const fetchStats = async () => {
-    try {
-      setLoading(true);
-
+  // Fetch stats with React Query
+  const {
+    data: stats,
+    isLoading: loading,
+    error: statsError,
+  } = useQuery<Stats>({
+    queryKey: ["admin-stats"],
+    queryFn: async () => {
       // Fetch all stats in parallel
       const [recordingsRes, profilesRes] = await Promise.all([
         supabase
@@ -64,22 +61,21 @@ export function Admin() {
         supabase.from("profiles").select("id", { count: "exact", head: true }),
       ]);
 
-      setStats({
+      return {
         totalRecordings: recordingsRes.count ?? 0,
         totalUsers: profilesRes.count ?? 0,
-      });
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-      toast.error("Failed to load statistics");
-    } finally {
-      setLoading(false);
-    }
-  };
+      };
+    },
+  });
 
-  const fetchReports = async () => {
-    try {
-      setLoadingReports(true);
-
+  // Fetch reports with React Query
+  const {
+    data: reports = [],
+    isLoading: loadingReports,
+    error: reportsError,
+  } = useQuery<Report[]>({
+    queryKey: ["admin-reports"],
+    queryFn: async () => {
       // First get all reports
       const { data: reportsData, error: reportsError } = await supabase
         .from("reports")
@@ -91,8 +87,6 @@ export function Admin() {
         console.error("Supabase error fetching reports:", reportsError);
         throw reportsError;
       }
-
-      console.log("Fetched raw reports:", reportsData);
 
       // If we have reports, fetch related data
       if (reportsData && reportsData.length > 0) {
@@ -110,9 +104,6 @@ export function Admin() {
           .select("id, full_name, email")
           .in("id", userIds);
 
-        console.log("Recordings:", recordingsData);
-        console.log("Profiles:", profilesData);
-
         // Combine the data
         const enrichedReports = reportsData.map((report) => ({
           ...report,
@@ -120,17 +111,20 @@ export function Admin() {
           profile: profilesData?.find((p) => p.id === report.user_id),
         }));
 
-        setReports(enrichedReports as Report[]);
-      } else {
-        setReports([]);
+        return enrichedReports as Report[];
       }
-    } catch (error) {
-      console.error("Error fetching reports:", error);
-      toast.error("Failed to load reports");
-    } finally {
-      setLoadingReports(false);
-    }
-  };
+
+      return [];
+    },
+  });
+
+  // Show error toast if stats or reports fail to load
+  if (statsError) {
+    toast.error("Failed to load statistics");
+  }
+  if (reportsError) {
+    toast.error("Failed to load reports");
+  }
 
   const updateReportStatus = async (reportId: string, newStatus: string) => {
     try {
@@ -143,8 +137,10 @@ export function Admin() {
       }
 
       toast.success(`Report marked as ${newStatus}`);
-      fetchReports();
-      fetchStats();
+
+      // Invalidate and refetch queries
+      queryClient.invalidateQueries({ queryKey: ["admin-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
     } catch (error) {
       console.error("Error updating report:", error);
       toast.error(

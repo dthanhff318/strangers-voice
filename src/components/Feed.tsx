@@ -96,10 +96,6 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
               Trending voices
             </h1>
           </div>
-          <p className="text-[var(--color-text-tertiary)] text-lg ml-4 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[var(--color-accent-primary)]" />
-            Top 10 most liked recordings
-          </p>
         </div>
       </div>
 
@@ -108,7 +104,11 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
         <div className="text-center py-12">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-[var(--color-btn-primary)] rounded-xl flex items-center justify-center opacity-50">
-              <img src="/favicon.png" alt="YMelody" className="w-10 h-10 logo-invert" />
+              <img
+                src="/favicon.png"
+                alt="YMelody"
+                className="w-10 h-10 logo-invert"
+              />
             </div>
           </div>
           <h3 className="text-xl font-semibold text-[var(--color-text-secondary)] mb-2">
