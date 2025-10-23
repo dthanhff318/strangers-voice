@@ -10,6 +10,7 @@ import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
 import { Button } from './ui/button'
 import { AvatarPicker } from './AvatarPicker'
 import { CompactAudioCard } from './CompactAudioCard'
+import { FollowersModal } from './FollowersModal'
 import { toast } from 'sonner'
 
 interface Recording {
@@ -47,6 +48,8 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
 
   const [name, setName] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
+  const [showFollowersModal, setShowFollowersModal] = useState(false)
+  const [followersModalMode, setFollowersModalMode] = useState<'followers' | 'following'>('followers')
 
   // Determine if viewing own profile or someone else's
   const isOwnProfile = !userId || userId === user?.id
@@ -412,13 +415,25 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
               </div>
               <div className="text-xs text-[var(--color-text-tertiary)]">Recordings</div>
             </div>
-            <div className="text-center">
+            <div
+              className="text-center cursor-pointer hover:bg-[var(--color-bg-elevated)] rounded-lg transition-colors p-2 -m-2"
+              onClick={() => {
+                setFollowersModalMode('followers')
+                setShowFollowersModal(true)
+              }}
+            >
               <div className="text-xl font-bold text-[var(--color-text-primary)]">
                 {loadingFollowStatus ? '-' : followersCount}
               </div>
               <div className="text-xs text-[var(--color-text-tertiary)]">Followers</div>
             </div>
-            <div className="text-center">
+            <div
+              className="text-center cursor-pointer hover:bg-[var(--color-bg-elevated)] rounded-lg transition-colors p-2 -m-2"
+              onClick={() => {
+                setFollowersModalMode('following')
+                setShowFollowersModal(true)
+              }}
+            >
               <div className="text-xl font-bold text-[var(--color-text-primary)]">
                 {loadingFollowStatus ? '-' : followingCount}
               </div>
@@ -478,6 +493,16 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
           onSelect={handleAvatarSelect}
           currentAvatar={avatarUrl}
           saving={saving}
+        />
+      )}
+
+      {/* Followers/Following Modal */}
+      {targetUserId && (
+        <FollowersModal
+          isOpen={showFollowersModal}
+          onClose={() => setShowFollowersModal(false)}
+          userId={targetUserId}
+          mode={followersModalMode}
         />
       )}
     </div>

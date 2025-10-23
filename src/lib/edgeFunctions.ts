@@ -96,3 +96,33 @@ export async function getFollowStatus(userId: string) {
     followingCount: number;
   }>("get-follow-status", { userId });
 }
+
+/**
+ * Get list of followers for a user
+ * @param userId - The ID of the user to get followers for
+ * @returns List of user profiles who follow this user
+ */
+export async function getFollowers(userId: string) {
+  return callEdgeFunction<{
+    data: {
+      id: string;
+      full_name: string | null;
+      avatar_url: string | null;
+    }[];
+  }>("get-followers", { userId });
+}
+
+/**
+ * Get list of users that a user is following
+ * @param userId - The ID of the user to get following list for
+ * @returns List of user profiles that this user follows
+ */
+export async function getFollowing(userId: string) {
+  return callEdgeFunction<{
+    data: {
+      id: string;
+      full_name: string | null;
+      avatar_url: string | null;
+    }[];
+  }>("get-following", { userId });
+}
