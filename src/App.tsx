@@ -6,6 +6,7 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { AudioRecorder } from "./components/AudioRecorder";
 import { Feed } from "./components/Feed";
 import { BottomNav } from "./components/BottomNav";
@@ -40,12 +41,12 @@ import "./App.css";
 type NavTab = "home" | "follow" | "profile" | "settings" | "admin";
 
 function MainContent() {
-  const [refreshKey, setRefreshKey] = useState(0);
   const [showRecorder, setShowRecorder] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [activeTab, setActiveTab] = useState<NavTab>("home");
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const { user, profile, loading, signOut, refreshProfile } = useAuth();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -73,7 +74,12 @@ function MainContent() {
   }, [location.pathname]);
 
   const handleUploadSuccess = () => {
-    setRefreshKey((prev) => prev + 1);
+    // Invalidate queries to refresh recordings list
+    queryClient.invalidateQueries({ queryKey: ["trending-recordings"] });
+    if (user?.id) {
+      queryClient.invalidateQueries({ queryKey: ["user-recordings", user.id] });
+    }
+
     setShowRecorder(false);
     navigate("/");
     setActiveTab("home");
@@ -200,7 +206,6 @@ function MainContent() {
             element={
               <div className="animate-in fade-in duration-500">
                 <Feed
-                  key={refreshKey}
                   onLoginRequired={() => setShowLoginModal(true)}
                 />
               </div>
