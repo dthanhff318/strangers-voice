@@ -43,6 +43,7 @@ type NavTab = "home" | "follow" | "profile" | "settings" | "admin";
 
 function MainContent() {
   const [showInitialLoading, setShowInitialLoading] = useState(true);
+  const [prefetchPromise, setPrefetchPromise] = useState<Promise<void> | undefined>();
   const [showRecorder, setShowRecorder] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [activeTab, setActiveTab] = useState<NavTab>("home");
@@ -51,6 +52,27 @@ function MainContent() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Prefetch trending recordings on initial load
+  useEffect(() => {
+    const prefetch = async () => {
+      try {
+        await queryClient.prefetchQuery({
+          queryKey: ["trending-recordings"],
+          queryFn: async () => {
+            const { getTrendingRecordsDashboard } = await import("./lib/edgeFunctions");
+            const { data, error } = await getTrendingRecordsDashboard();
+            if (error) throw error;
+            return data?.data || [];
+          },
+        });
+      } catch (error) {
+        console.error("Error prefetching recordings:", error);
+      }
+    };
+
+    setPrefetchPromise(prefetch());
+  }, [queryClient]);
 
   useEffect(() => {
     if (profile && !profile.avatar_url) {
@@ -119,7 +141,12 @@ function MainContent() {
 
   // Show initial loading screen
   if (showInitialLoading) {
-    return <LoadingScreen onComplete={handleLoadingComplete} />;
+    return (
+      <LoadingScreen
+        onComplete={handleLoadingComplete}
+        onReady={prefetchPromise}
+      />
+    );
   }
 
   return (

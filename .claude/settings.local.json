@@ -4,7 +4,10 @@
       "Bash(mkdir:*)",
       "Bash(pnpm tsc:*)",
       "Bash(pnpm add:*)",
-      "Bash(pnpm run:*)"
+      "Bash(pnpm run:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(pnpm build:*)"
     ],
     "deny": [],
     "ask": []

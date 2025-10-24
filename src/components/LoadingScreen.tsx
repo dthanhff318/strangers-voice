@@ -2,23 +2,46 @@ import { useEffect, useState } from "react";
 
 interface LoadingScreenProps {
   onComplete: () => void;
+  onReady?: Promise<void>; // Promise to wait for (e.g., data fetching)
 }
 
-export function LoadingScreen({ onComplete }: LoadingScreenProps) {
+export function LoadingScreen({ onComplete, onReady }: LoadingScreenProps) {
   const [progress, setProgress] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
+  const [isDataReady, setIsDataReady] = useState(false);
 
   useEffect(() => {
-    // Random duration between 1000-2000ms
-    const duration = 1000 + Math.random() * 1000;
+    // Track when data is ready
+    if (onReady) {
+      onReady.then(() => {
+        setIsDataReady(true);
+      }).catch(() => {
+        // Even if fetch fails, still mark as ready to not block UI
+        setIsDataReady(true);
+      });
+    } else {
+      setIsDataReady(true);
+    }
+  }, [onReady]);
+
+  useEffect(() => {
+    // Minimum duration: 1000ms for smooth UX
+    const minDuration = 1000;
     const interval = 50; // Update every 50ms
-    const steps = duration / interval;
+    const steps = minDuration / interval;
     const increment = 100 / steps;
 
     let currentProgress = 0;
+    const startTime = Date.now();
 
     const timer = setInterval(() => {
       currentProgress += increment;
+      const elapsed = Date.now() - startTime;
+
+      // If data is ready and minimum time has passed, complete at 100%
+      if (isDataReady && elapsed >= minDuration) {
+        currentProgress = 100;
+      }
 
       if (currentProgress >= 100) {
         currentProgress = 100;
@@ -40,7 +63,7 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
     }, interval);
 
     return () => clearInterval(timer);
-  }, [onComplete]);
+  }, [onComplete, isDataReady]);
 
   return (
     <div
