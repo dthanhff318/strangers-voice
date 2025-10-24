@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { AudioRecorder } from "./components/AudioRecorder";
 import { Feed } from "./components/Feed";
 import { BottomNav } from "./components/BottomNav";
@@ -103,7 +109,10 @@ function MainContent() {
       {/* Top Navigation */}
       <nav className="bg-[var(--color-bg-primary)]/90 backdrop-blur-sm border-b border-[var(--color-border)] sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
+          <div
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => navigate("/")}
+          >
             <div className="w-8 h-8 bg-[var(--color-btn-primary)] rounded-md flex items-center justify-center">
               <img src="/favicon.png" alt="" className="w-6 h-6 logo-invert" />
             </div>
@@ -121,11 +130,17 @@ function MainContent() {
           ) : profile && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2 hover:bg-[var(--color-bg-card)] px-3 py-2 rounded-lg transition-colors">
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 hover:bg-[var(--color-bg-card)] px-3 py-2 rounded-lg transition-colors"
+                >
                   <Avatar className="w-8 h-8">
-                    <AvatarImage src={profile?.avatar_url ?? ""} alt={profile?.full_name ?? ""} />
+                    <AvatarImage
+                      src={profile?.avatar_url ?? ""}
+                      alt={profile?.full_name ?? ""}
+                    />
                     <AvatarFallback className="bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] text-xs">
-                      {profile?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                      {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <span className="text-[var(--color-text-primary)] text-sm font-medium hidden md:block">
@@ -200,11 +215,15 @@ function MainContent() {
           />
           <Route
             path="/profile"
-            element={<Profile onLoginRequired={() => setShowLoginModal(true)} />}
+            element={
+              <Profile onLoginRequired={() => setShowLoginModal(true)} />
+            }
           />
           <Route
             path="/profile/:userId"
-            element={<Profile onLoginRequired={() => setShowLoginModal(true)} />}
+            element={
+              <Profile onLoginRequired={() => setShowLoginModal(true)} />
+            }
           />
           <Route
             path="/settings"
