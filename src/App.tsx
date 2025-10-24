@@ -45,7 +45,7 @@ function MainContent() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [activeTab, setActiveTab] = useState<NavTab>("home");
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
-  const { user, profile, loading, signOut } = useAuth();
+  const { user, profile, loading, signOut, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -84,6 +84,7 @@ function MainContent() {
   };
 
   const handleOnboardingComplete = async () => {
+    await refreshProfile();
     setNeedsOnboarding(false);
   };
 
