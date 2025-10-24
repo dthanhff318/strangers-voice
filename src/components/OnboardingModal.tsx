@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
 import type { User } from "@supabase/supabase-js";
+import { updateUserInfo } from "../lib/edgeFunctions";
 import { AvatarPicker } from "./AvatarPicker";
 import { Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
@@ -23,6 +23,7 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
 
   const handleAvatarSelect = (newAvatarUrl: string) => {
     setAvatarUrl(newAvatarUrl);
+    setShowAvatarPicker(false);
   };
 
   const handleContinueToName = () => {
@@ -39,25 +40,10 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
       setSaving(true);
       setError(null);
 
-      // Update auth user metadata
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: {
-          full_name: name.trim(),
-          avatar_url: avatarUrl,
-        },
-      });
+      // Call edge function to update user info
+      const { error } = await updateUserInfo(name.trim(), avatarUrl);
 
-      if (updateError) throw updateError;
-
-      // Update profiles table
-      const { error: profileError } = await supabase.from("profiles").upsert({
-        id: user.id,
-        full_name: name.trim(),
-        avatar_url: avatarUrl,
-        email: user.email,
-      });
-
-      if (profileError) throw profileError;
+      if (error) throw error;
 
       // Success!
       onComplete();
@@ -77,13 +63,13 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
       <div className="relative bg-[var(--color-bg-card)] rounded-3xl border border-[var(--color-border)] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
         <div className="relative bg-gradient-to-r from-[var(--color-bg-elevated)] via-[var(--color-bg-card-hover)] to-[var(--color-bg-elevated)] p-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--color-btn-primary)] mb-4">
-            <img src="" className="w-full h-full object-contain" alt="" />
+            <img src="/favicon.png" className="w-10 h-10 logo-invert" alt="YMelody" />
           </div>
           <h2 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">
-            Welcome to Stranger Voice!
+            Welcome to YMelody!
           </h2>
           <p className="text-[var(--color-text-tertiary)]">
-            Let's set up your profile
+            Share your voice, connect with the world
           </p>
         </div>
 
