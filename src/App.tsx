@@ -12,6 +12,7 @@ import { Feed } from "./components/Feed";
 import { BottomNav } from "./components/BottomNav";
 import { LoginModal } from "./components/LoginModal";
 import { OnboardingModal } from "./components/OnboardingModal";
+import { LoadingScreen } from "./components/LoadingScreen";
 import { Toaster } from "@/components/ui/sonner";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ import "./App.css";
 type NavTab = "home" | "follow" | "profile" | "settings" | "admin";
 
 function MainContent() {
+  const [showInitialLoading, setShowInitialLoading] = useState(true);
   const [showRecorder, setShowRecorder] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [activeTab, setActiveTab] = useState<NavTab>("home");
@@ -110,6 +112,15 @@ function MainContent() {
     setActiveTab("admin");
     navigate("/admin");
   };
+
+  const handleLoadingComplete = () => {
+    setShowInitialLoading(false);
+  };
+
+  // Show initial loading screen
+  if (showInitialLoading) {
+    return <LoadingScreen onComplete={handleLoadingComplete} />;
+  }
 
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)] pb-32">
