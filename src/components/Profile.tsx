@@ -235,6 +235,14 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
     setIsEditing(false)
   }
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear()
+    return `${day}/${month}/${year}`
+  }
+
   return (
     <div className="min-h-[70vh] animate-in fade-in duration-500">
       <div className="max-w-2xl mx-auto">
@@ -361,7 +369,7 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
 
               {/* Member Since */}
               <div className="text-xs text-[var(--color-text-muted)]">
-                Member since {new Date(profile?.created_at || new Date()).toLocaleDateString()}
+                Member since {formatDate(profile?.created_at || new Date().toISOString())}
               </div>
 
               {/* Follow Button for other user's profile */}
