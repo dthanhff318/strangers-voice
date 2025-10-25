@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
+import { getRecommendedUsers } from "../lib/edgeFunctions";
 import { Search, Users, Loader2, Mic } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { UserProfileModal } from "./UserProfileModal";
@@ -105,21 +106,16 @@ export function Follow() {
     try {
       setLoadingRecommended(true);
 
-      // Get random 5 users (excluding current user)
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, avatar_url, email")
-        .neq("id", user.id)
-        .limit(100); // Get more to shuffle client-side
+      // Call edge function to get random recommended users
+      const { data, error } = await getRecommendedUsers();
 
       if (error) throw error;
 
-      // Shuffle and take 5
-      const shuffled = (data || []).sort(() => Math.random() - 0.5).slice(0, 5);
-      setRecommendedUsers(shuffled);
+      const users = data?.data || [];
+      setRecommendedUsers(users);
 
       // Fetch recordings count for recommended users
-      fetchRecordingsCounts(shuffled.map((u) => u.id));
+      fetchRecordingsCounts(users.map((u) => u.id));
     } catch (err) {
       console.error("Error fetching recommended users:", err);
     } finally {

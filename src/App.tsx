@@ -7,7 +7,6 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "./lib/supabase";
 import { AudioRecorder } from "./components/AudioRecorder";
 import { Feed } from "./components/Feed";
 import { BottomNav } from "./components/BottomNav";
@@ -73,18 +72,10 @@ function MainContent() {
           });
         }
         // Follow page - prefetch recommended users
-        else if (initialPath === "/follow") {
-          if (user?.id) {
-            const { data } = await supabase
-              .from("profiles")
-              .select("id, full_name, avatar_url, email")
-              .neq("id", user.id)
-              .limit(100);
-
-            // Shuffle and store top 5
-            const shuffled = (data || []).sort(() => Math.random() - 0.5).slice(0, 5);
-            // Cache could be used here if Follow is migrated to React Query
-          }
+        else if (initialPath === "/follow" && user?.id) {
+          const { getRecommendedUsers } = await import("./lib/edgeFunctions");
+          await getRecommendedUsers();
+          // Note: Follow component doesn't use React Query yet, but prefetch still warms up the connection
         }
         // Profile page - prefetch own recordings
         else if (initialPath === "/profile" && user?.id) {

@@ -126,3 +126,18 @@ export async function getFollowing(userId: string) {
     }[];
   }>("get-following", { userId });
 }
+
+/**
+ * Get random recommended users
+ * @returns List of 5 random user profiles (excluding current user)
+ */
+export async function getRecommendedUsers() {
+  return callEdgeFunction<{
+    data: {
+      id: string;
+      full_name: string | null;
+      avatar_url: string | null;
+      email: string | null;
+    }[];
+  }>("get-recommended-users");
+}
