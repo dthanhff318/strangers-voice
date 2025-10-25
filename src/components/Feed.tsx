@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { getTrendingRecordsDashboard } from "../lib/edgeFunctions";
 import { AudioCard } from "./AudioCard";
-import { AudioLoading } from "./AudioLoading";
 import { TrendingUp } from "lucide-react";
 
 interface Recording {
@@ -33,7 +32,6 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
   // Use React Query for data fetching with caching
   const {
     data: recordings = [],
-    isLoading: loading,
     error,
   } = useQuery<Recording[]>({
     queryKey: ["trending-recordings"],
@@ -66,10 +64,6 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
       supabase.removeChannel(channel);
     };
   }, [queryClient]);
-
-  if (loading) {
-    return <AudioLoading />;
-  }
 
   if (error) {
     return (
