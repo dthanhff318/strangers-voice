@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 
 interface LoadingScreenProps {
   onComplete: () => void;
   progress: number; // Real progress from 0-100
 }
 
-export function LoadingScreen({ onComplete, progress }: LoadingScreenProps) {
+export const LoadingScreen = memo(function LoadingScreen({ onComplete, progress }: LoadingScreenProps) {
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
@@ -80,4 +80,4 @@ export function LoadingScreen({ onComplete, progress }: LoadingScreenProps) {
       </div>
     </div>
   );
-}
+});

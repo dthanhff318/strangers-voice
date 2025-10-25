@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -52,9 +52,14 @@ function MainContent() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
+  const hasPrefetched = useRef(false);
 
   // Prefetch data based on initial route with progress tracking
   useEffect(() => {
+    // Only run once
+    if (hasPrefetched.current) return;
+    hasPrefetched.current = true;
+
     const prefetch = async () => {
       try {
         const initialPath = location.pathname;
@@ -120,7 +125,8 @@ function MainContent() {
     };
 
     prefetch();
-  }, [queryClient, location.pathname, user?.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   useEffect(() => {
     if (profile && !profile.avatar_url) {
@@ -183,9 +189,9 @@ function MainContent() {
     navigate("/admin");
   };
 
-  const handleLoadingComplete = () => {
+  const handleLoadingComplete = useCallback(() => {
     setShowInitialLoading(false);
-  };
+  }, []);
 
   // Show initial loading screen
   if (showInitialLoading) {
