@@ -29,7 +29,7 @@ export const LoadingScreen = memo(function LoadingScreen({ onComplete, progress 
       }`}
     >
       {/* Logo with pulse animation */}
-      <div className="mb-8 animate-in zoom-in-50 duration-700">
+      <div className="mb-8">
         <div className="relative">
           {/* Glow effect */}
           <div className="absolute inset-0 bg-[var(--color-btn-primary)] opacity-20 blur-3xl animate-pulse" />
@@ -46,17 +46,17 @@ export const LoadingScreen = memo(function LoadingScreen({ onComplete, progress 
       </div>
 
       {/* Brand name */}
-      <h1 className="text-4xl font-bold text-[var(--color-text-primary)] mb-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+      <h1 className="text-4xl font-bold text-[var(--color-text-primary)] mb-2">
         YMelody
       </h1>
 
       {/* Tagline */}
-      <p className="text-[var(--color-text-tertiary)] mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+      <p className="text-[var(--color-text-tertiary)] mb-12">
         Share your voice with the world
       </p>
 
       {/* Progress bar */}
-      <div className="w-64 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+      <div className="w-64">
         <div className="h-1.5 bg-[var(--color-bg-elevated)] rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-[var(--color-btn-primary)] to-[var(--color-accent-primary)] rounded-full transition-all duration-300 ease-out"
