@@ -2,68 +2,25 @@ import { useEffect, useState } from "react";
 
 interface LoadingScreenProps {
   onComplete: () => void;
-  onReady?: Promise<void>; // Promise to wait for (e.g., data fetching)
+  progress: number; // Real progress from 0-100
 }
 
-export function LoadingScreen({ onComplete, onReady }: LoadingScreenProps) {
-  const [progress, setProgress] = useState(0);
+export function LoadingScreen({ onComplete, progress }: LoadingScreenProps) {
   const [isExiting, setIsExiting] = useState(false);
-  const [isDataReady, setIsDataReady] = useState(false);
 
   useEffect(() => {
-    // Track when data is ready
-    if (onReady) {
-      onReady.then(() => {
-        setIsDataReady(true);
-      }).catch(() => {
-        // Even if fetch fails, still mark as ready to not block UI
-        setIsDataReady(true);
-      });
-    } else {
-      setIsDataReady(true);
-    }
-  }, [onReady]);
+    // When progress reaches 100%, start exit animation
+    if (progress >= 100) {
+      setTimeout(() => {
+        setIsExiting(true);
 
-  useEffect(() => {
-    // Minimum duration: 1000ms for smooth UX
-    const minDuration = 1000;
-    const interval = 50; // Update every 50ms
-    const steps = minDuration / interval;
-    const increment = 100 / steps;
-
-    let currentProgress = 0;
-    const startTime = Date.now();
-
-    const timer = setInterval(() => {
-      currentProgress += increment;
-      const elapsed = Date.now() - startTime;
-
-      // If data is ready and minimum time has passed, complete at 100%
-      if (isDataReady && elapsed >= minDuration) {
-        currentProgress = 100;
-      }
-
-      if (currentProgress >= 100) {
-        currentProgress = 100;
-        setProgress(100);
-        clearInterval(timer);
-
-        // Start exit animation
+        // Complete after fade out
         setTimeout(() => {
-          setIsExiting(true);
-
-          // Complete after fade out
-          setTimeout(() => {
-            onComplete();
-          }, 500);
-        }, 200);
-      } else {
-        setProgress(currentProgress);
-      }
-    }, interval);
-
-    return () => clearInterval(timer);
-  }, [onComplete, isDataReady]);
+          onComplete();
+        }, 500);
+      }, 200);
+    }
+  }, [progress, onComplete]);
 
   return (
     <div

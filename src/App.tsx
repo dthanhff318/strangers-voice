@@ -43,7 +43,7 @@ type NavTab = "home" | "follow" | "profile" | "settings" | "admin";
 
 function MainContent() {
   const [showInitialLoading, setShowInitialLoading] = useState(true);
-  const [prefetchPromise, setPrefetchPromise] = useState<Promise<void> | undefined>();
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [showRecorder, setShowRecorder] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [activeTab, setActiveTab] = useState<NavTab>("home");
@@ -53,14 +53,23 @@ function MainContent() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Prefetch data based on initial route
+  // Prefetch data based on initial route with progress tracking
   useEffect(() => {
     const prefetch = async () => {
       try {
         const initialPath = location.pathname;
 
+        // Start at 10%
+        setLoadingProgress(10);
+
+        // Simulate some initial loading time
+        await new Promise(resolve => setTimeout(resolve, 100));
+        setLoadingProgress(30);
+
         // Home page - prefetch trending recordings
         if (initialPath === "/") {
+          setLoadingProgress(50);
+
           await queryClient.prefetchQuery({
             queryKey: ["trending-recordings"],
             queryFn: async () => {
@@ -70,15 +79,22 @@ function MainContent() {
               return data?.data || [];
             },
           });
+
+          setLoadingProgress(90);
         }
         // Follow page - prefetch recommended users
         else if (initialPath === "/follow" && user?.id) {
+          setLoadingProgress(50);
+
           const { getRecommendedUsers } = await import("./lib/edgeFunctions");
           await getRecommendedUsers();
-          // Note: Follow component doesn't use React Query yet, but prefetch still warms up the connection
+
+          setLoadingProgress(90);
         }
         // Profile page - prefetch own recordings
         else if (initialPath === "/profile" && user?.id) {
+          setLoadingProgress(50);
+
           await queryClient.prefetchQuery({
             queryKey: ["user-recordings", user.id],
             queryFn: async () => {
@@ -88,13 +104,22 @@ function MainContent() {
               return data?.data || [];
             },
           });
+
+          setLoadingProgress(90);
         }
+
+        // Final step - ensure minimum display time
+        await new Promise(resolve => setTimeout(resolve, 200));
+        setLoadingProgress(100);
+
       } catch (error) {
         console.error("Error prefetching data:", error);
+        // Even on error, complete loading to not block UI
+        setLoadingProgress(100);
       }
     };
 
-    setPrefetchPromise(prefetch());
+    prefetch();
   }, [queryClient, location.pathname, user?.id]);
 
   useEffect(() => {
@@ -167,7 +192,7 @@ function MainContent() {
     return (
       <LoadingScreen
         onComplete={handleLoadingComplete}
-        onReady={prefetchPromise}
+        progress={loadingProgress}
       />
     );
   }
