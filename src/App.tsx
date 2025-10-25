@@ -7,6 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "./lib/supabase";
 import { AudioRecorder } from "./components/AudioRecorder";
 import { Feed } from "./components/Feed";
 import { BottomNav } from "./components/BottomNav";
@@ -53,26 +54,57 @@ function MainContent() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Prefetch trending recordings on initial load
+  // Prefetch data based on initial route
   useEffect(() => {
     const prefetch = async () => {
       try {
-        await queryClient.prefetchQuery({
-          queryKey: ["trending-recordings"],
-          queryFn: async () => {
-            const { getTrendingRecordsDashboard } = await import("./lib/edgeFunctions");
-            const { data, error } = await getTrendingRecordsDashboard();
-            if (error) throw error;
-            return data?.data || [];
-          },
-        });
+        const initialPath = location.pathname;
+
+        // Home page - prefetch trending recordings
+        if (initialPath === "/") {
+          await queryClient.prefetchQuery({
+            queryKey: ["trending-recordings"],
+            queryFn: async () => {
+              const { getTrendingRecordsDashboard } = await import("./lib/edgeFunctions");
+              const { data, error } = await getTrendingRecordsDashboard();
+              if (error) throw error;
+              return data?.data || [];
+            },
+          });
+        }
+        // Follow page - prefetch recommended users
+        else if (initialPath === "/follow") {
+          if (user?.id) {
+            const { data } = await supabase
+              .from("profiles")
+              .select("id, full_name, avatar_url, email")
+              .neq("id", user.id)
+              .limit(100);
+
+            // Shuffle and store top 5
+            const shuffled = (data || []).sort(() => Math.random() - 0.5).slice(0, 5);
+            // Cache could be used here if Follow is migrated to React Query
+          }
+        }
+        // Profile page - prefetch own recordings
+        else if (initialPath === "/profile" && user?.id) {
+          await queryClient.prefetchQuery({
+            queryKey: ["user-recordings", user.id],
+            queryFn: async () => {
+              const { getMyRecordings } = await import("./lib/edgeFunctions");
+              const { data, error } = await getMyRecordings();
+              if (error) throw error;
+              return data?.data || [];
+            },
+          });
+        }
       } catch (error) {
-        console.error("Error prefetching recordings:", error);
+        console.error("Error prefetching data:", error);
       }
     };
 
     setPrefetchPromise(prefetch());
-  }, [queryClient]);
+  }, [queryClient, location.pathname, user?.id]);
 
   useEffect(() => {
     if (profile && !profile.avatar_url) {
