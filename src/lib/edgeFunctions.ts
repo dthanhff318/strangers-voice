@@ -56,11 +56,21 @@ export async function deleteRecord(recordingId: string) {
 
 /**
  * Update user profile information
- * @param fullName - User's full name
- * @param avatarUrl - User's avatar URL
+ * @param fullName - User's full name (optional)
+ * @param avatarUrl - User's avatar URL (optional)
+ * @param backgroundId - User's selected background ID (optional)
  */
-export async function updateUserInfo(fullName: string, avatarUrl: string) {
-  return callEdgeFunction("update-user-info", { fullName, avatarUrl });
+export async function updateUserInfo(
+  fullName?: string,
+  avatarUrl?: string,
+  backgroundId?: string
+) {
+  const body: any = {};
+  if (fullName !== undefined) body.fullName = fullName;
+  if (avatarUrl !== undefined) body.avatarUrl = avatarUrl;
+  if (backgroundId !== undefined) body.backgroundId = backgroundId;
+
+  return callEdgeFunction("update-user-info", body);
 }
 
 /**

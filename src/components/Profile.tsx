@@ -5,12 +5,14 @@ import { useAuth } from '../contexts/AuthContext'
 import { useFollow } from '../hooks/useFollow'
 import { getMyRecordings, updateUserInfo } from '../lib/edgeFunctions'
 import { supabase } from '../lib/supabase'
-import { Camera, Edit2, Save, X, Loader2, User as UserIcon, Mic, ArrowLeft, UserPlus, UserCheck } from 'lucide-react'
+import { Camera, Edit2, Save, X, Loader2, User as UserIcon, Mic, ArrowLeft, UserPlus, UserCheck, Image } from 'lucide-react'
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
 import { Button } from './ui/button'
 import { AvatarPicker } from './AvatarPicker'
+import { BackgroundPicker } from './BackgroundPicker'
 import { CompactAudioCard } from './CompactAudioCard'
 import { FollowersModal } from './FollowersModal'
+import { getBackgroundById } from '../constants/backgrounds'
 import { toast } from 'sonner'
 
 interface Recording {
@@ -31,6 +33,7 @@ interface UserProfile {
   avatar_url: string | null
   email: string | null
   created_at: string
+  background_id: string | null
 }
 
 interface ProfileProps {
@@ -50,6 +53,7 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [showFollowersModal, setShowFollowersModal] = useState(false)
   const [followersModalMode, setFollowersModalMode] = useState<'followers' | 'following'>('followers')
+  const [showBackgroundPicker, setShowBackgroundPicker] = useState(false)
 
   // Determine if viewing own profile or someone else's
   const isOwnProfile = !userId || userId === user?.id
@@ -233,6 +237,27 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
   const handleCancel = () => {
     setName(profile?.full_name || '')
     setIsEditing(false)
+  }
+
+  const handleBackgroundSelect = async (backgroundId: string) => {
+    try {
+      setSaving(true)
+
+      // Call edge function to update background
+      const { error } = await updateUserInfo(undefined, undefined, backgroundId)
+
+      if (error) throw error
+
+      // Refresh profile data
+      await refreshProfile()
+
+      toast.success('Background updated successfully')
+    } catch (err) {
+      console.error('Error saving background:', err)
+      toast.error('Failed to save background. Please try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const formatDate = (dateString: string) => {
@@ -448,6 +473,39 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
               <div className="text-xs text-[var(--color-text-tertiary)]">Following</div>
             </div>
           </div>
+
+          {/* Background Selector - Only for own profile */}
+          {isOwnProfile && (() => {
+            const currentBackground = getBackgroundById(profile?.background_id || null);
+            const hasBackground = currentBackground && currentBackground.imageUrl;
+
+            return (
+              <div className="pt-4 mt-4 border-t border-[var(--color-border)]">
+                <div
+                  className="relative rounded-lg overflow-hidden cursor-pointer group h-24"
+                  onClick={() => setShowBackgroundPicker(true)}
+                  style={hasBackground ? {
+                    backgroundImage: `url(${currentBackground.imageUrl})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  } : {
+                    backgroundColor: 'var(--color-bg-elevated)'
+                  }}
+                >
+                  {/* Overlay for better text visibility */}
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-all" />
+
+                  {/* Button content */}
+                  <div className="relative h-full flex items-center justify-center gap-2 z-10">
+                    <Image className={`w-5 h-5 ${hasBackground ? 'text-white' : 'text-[var(--color-text-primary)]'}`} />
+                    <span className={`font-medium ${hasBackground ? 'text-white' : 'text-[var(--color-text-primary)]'}`}>
+                      {hasBackground ? currentBackground.name : 'Choose Card Background'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Recordings Section */}
@@ -511,6 +569,16 @@ export function Profile({ onLoginRequired }: ProfileProps = {}) {
           onClose={() => setShowFollowersModal(false)}
           userId={targetUserId}
           mode={followersModalMode}
+        />
+      )}
+
+      {/* Background Picker - Only for own profile */}
+      {isOwnProfile && (
+        <BackgroundPicker
+          isOpen={showBackgroundPicker}
+          onClose={() => setShowBackgroundPicker(false)}
+          currentBackgroundId={profile?.background_id || null}
+          onSelect={handleBackgroundSelect}
         />
       )}
     </div>

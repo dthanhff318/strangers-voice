@@ -39,15 +39,18 @@ serve(async (req) => {
     }
 
     // Get request body
-    const { fullName, avatarUrl } = await req.json();
+    const { fullName, avatarUrl, backgroundId } = await req.json();
+
+    // Build update object - only include fields that are provided
+    const updateData: Record<string, any> = {};
+    if (fullName !== undefined) updateData.full_name = fullName;
+    if (avatarUrl !== undefined) updateData.avatar_url = avatarUrl;
+    if (backgroundId !== undefined) updateData.background_id = backgroundId;
 
     // Update profiles table
     const { error: profileError } = await supabaseClient
       .from("profiles")
-      .update({
-        full_name: fullName,
-        avatar_url: avatarUrl,
-      })
+      .update(updateData)
       .eq("id", user.id);
 
     if (profileError) {

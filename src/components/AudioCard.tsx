@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAudioPlayer } from "../contexts/AudioPlayerContext";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { UserProfileModal } from "./UserProfileModal";
+import { getBackgroundById } from "../constants/backgrounds";
 
 interface Recording {
   id: string;
@@ -17,6 +18,7 @@ interface Recording {
     id: string;
     full_name: string | null;
     avatar_url: string | null;
+    background_id: string | null;
   } | null;
 }
 
@@ -40,14 +42,27 @@ export function AudioCard({ recording }: AudioCardProps) {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  // Get background image from user's profile
+  const background = getBackgroundById(recording.profiles?.background_id || null);
+  const hasBackground = background && background.imageUrl;
+
   return (
     <>
       <div
-        className="bg-[var(--color-bg-card)] rounded-2xl p-4 hover:bg-[var(--color-bg-card-hover)] transition-all border border-[var(--color-border)] cursor-pointer"
+        className="relative bg-[var(--color-bg-card)] rounded-2xl p-4 hover:bg-[var(--color-bg-card-hover)] transition-all border border-[var(--color-border)] cursor-pointer overflow-hidden"
         onClick={handleCardClick}
+        style={hasBackground ? {
+          backgroundImage: `url(${background.imageUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        } : undefined}
       >
+        {/* Dark overlay for better text readability when background is present */}
+        {hasBackground && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-black/40 rounded-2xl" />
+        )}
         {/* Header: Avatar, Name, Title, Duration */}
-        <div className="flex items-center gap-3 md:gap-4">
+        <div className="relative flex items-center gap-3 md:gap-4 z-10">
           {/* Avatar */}
           <Avatar
             className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
@@ -64,16 +79,16 @@ export function AudioCard({ recording }: AudioCardProps) {
 
           {/* Author & Title */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-[var(--color-text-primary)] text-lg mb-1 truncate">
+            <h3 className={`font-semibold text-lg mb-1 truncate ${hasBackground ? 'text-white' : 'text-[var(--color-text-primary)]'}`}>
               {recording.title || "Untitled"}
             </h3>
-            <p className="text-[var(--color-text-tertiary)] text-sm truncate">
+            <p className={`text-sm truncate ${hasBackground ? 'text-white/80' : 'text-[var(--color-text-tertiary)]'}`}>
               {recording.profiles?.full_name || "Unknown"}
             </p>
           </div>
 
           {/* Duration */}
-          <div className="text-[var(--color-text-tertiary)] text-sm font-medium flex-shrink-0">
+          <div className={`text-sm font-medium flex-shrink-0 ${hasBackground ? 'text-white/90' : 'text-[var(--color-text-tertiary)]'}`}>
             {formatDuration(recording.duration)}
           </div>
         </div>

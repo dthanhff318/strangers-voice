@@ -3,7 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { getTrendingRecordsDashboard } from "../lib/edgeFunctions";
 import { AudioCard } from "./AudioCard";
-import { TrendingUp } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Recording {
   id: string;
@@ -19,6 +20,7 @@ interface Recording {
     id: string;
     full_name: string | null;
     avatar_url: string | null;
+    background_id: string | null;
   } | null;
 }
 
@@ -26,8 +28,24 @@ interface FeedProps {
   onLoginRequired?: () => void;
 }
 
+// Helper function to get time-based greeting
+function getTimeBasedGreeting(): string {
+  const hour = new Date().getHours();
+
+  if (hour >= 5 && hour < 12) {
+    return "Good morning";
+  } else if (hour >= 12 && hour < 17) {
+    return "Good afternoon";
+  } else if (hour >= 17 && hour < 21) {
+    return "Good evening";
+  } else {
+    return "Good night";
+  }
+}
+
 export function Feed({ onLoginRequired }: FeedProps = {}) {
   const queryClient = useQueryClient();
+  const { profile } = useAuth();
 
   // Use React Query for data fetching with caching
   const {
@@ -78,6 +96,9 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
     queryClient.invalidateQueries({ queryKey: ["trending-recordings"] });
   };
 
+  const greeting = getTimeBasedGreeting();
+  const displayName = profile?.full_name ? `, ${profile.full_name}` : "";
+
   return (
     <div className="space-y-8">
       {/* Header with gradient */}
@@ -85,9 +106,9 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
         <div className="absolute inset-0 bg-[var(--color-accent-subtle)] blur-3xl -z-10" />
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <TrendingUp className="w-8 h-8 text-[var(--color-accent-primary)]" />
-            <h1 className="text-4xl font-bold text-[var(--color-text-primary)]">
-              Trending voices
+            <Sparkles className="w-6 h-6 text-[var(--color-accent-primary)]" />
+            <h1 className="text-2xl font-semibold text-[var(--color-text-primary)]">
+              {greeting}{displayName}
             </h1>
           </div>
         </div>
@@ -113,7 +134,7 @@ export function Feed({ onLoginRequired }: FeedProps = {}) {
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {recordings.map((recording) => (
             <AudioCard
               key={recording.id}

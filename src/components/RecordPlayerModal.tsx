@@ -21,6 +21,7 @@ import { useAudioPlayer } from "../contexts/AudioPlayerContext";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { UserProfileModal } from "./UserProfileModal";
 import { ReportForm } from "./ReportForm";
+import { getBackgroundById } from "../constants/backgrounds";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -241,6 +242,10 @@ export function RecordPlayerModal({ onLoginRequired }: RecordPlayerModalProps) {
 
   if (!isOpen || !recording) return null;
 
+  // Get background image from user's profile
+  const background = getBackgroundById(recording.profiles?.background_id || null);
+  const hasBackground = background && background.imageUrl;
+
   return (
     <>
       {/* Backdrop */}
@@ -267,22 +272,36 @@ export function RecordPlayerModal({ onLoginRequired }: RecordPlayerModalProps) {
                 bottom: 96,
                 right: 16,
                 width: 320,
-                zIndex: 45, // Lower z-index for mini mode to stay above content but below modals
+                zIndex: 45,
+                ...(hasBackground ? {
+                  backgroundImage: `url(${background.imageUrl})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                } : {})
               }
             : {
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
                 width: "min(672px, calc(100vw - 2rem))",
-                zIndex: 51, // Higher z-index for full mode to stay above backdrop
+                zIndex: 51,
+                ...(hasBackground ? {
+                  backgroundImage: `url(${background.imageUrl})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                } : {})
               }
         }
       >
+        {/* Dark overlay for better text readability when background is present */}
+        {hasBackground && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-black/40 rounded-xl" />
+        )}
         {/* Header - Always visible */}
         <div
-          className={`flex items-center justify-between ${
+          className={`relative z-10 flex items-center justify-between ${
             isMiniMode ? "p-2" : "p-3"
-          } ${!isMiniMode ? "border-b border-[var(--color-border)]" : ""}`}
+          } ${!isMiniMode && !hasBackground ? "border-b border-[var(--color-border)]" : ""}`}
         >
           <div
             className={`flex items-center ${
@@ -305,14 +324,14 @@ export function RecordPlayerModal({ onLoginRequired }: RecordPlayerModalProps) {
 
             <div className="flex-1 min-w-0">
               <h3
-                className={`font-semibold text-[var(--color-text-primary)] ${
+                className={`font-semibold ${hasBackground ? 'text-white' : 'text-[var(--color-text-primary)]'} ${
                   isMiniMode ? "text-xs" : "text-sm"
                 } truncate`}
               >
                 {recording.title || "Untitled"}
               </h3>
               <p
-                className={`text-[var(--color-text-tertiary)] ${
+                className={`${hasBackground ? 'text-white/80' : 'text-[var(--color-text-tertiary)]'} ${
                   isMiniMode ? "text-[10px]" : "text-xs"
                 } truncate`}
               >
@@ -357,7 +376,7 @@ export function RecordPlayerModal({ onLoginRequired }: RecordPlayerModalProps) {
         </div>
 
         {/* Player Controls - Always visible */}
-        <div className={isMiniMode ? "px-2 pb-2" : "p-3"}>
+        <div className={`relative z-10 ${isMiniMode ? "px-2 pb-2" : "p-3"}`}>
           <div
             className={`flex items-center ${isMiniMode ? "gap-2" : "gap-3"}`}
           >
@@ -395,15 +414,15 @@ export function RecordPlayerModal({ onLoginRequired }: RecordPlayerModalProps) {
 
         {/* Full Mode Details */}
         {!isMiniMode && (
-          <div className="p-6 pt-0 space-y-4">
+          <div className="relative z-10 p-6 pt-0 space-y-4">
             {/* Duration */}
-            <div className="text-[var(--color-text-tertiary)] text-sm">
+            <div className={`text-sm ${hasBackground ? 'text-white/90' : 'text-[var(--color-text-tertiary)]'}`}>
               {formatDuration(recording.duration)}
             </div>
 
             {/* Description */}
             {recording.description && (
-              <p className="text-[var(--color-text-secondary)] text-sm">
+              <p className={`text-sm ${hasBackground ? 'text-white/80' : 'text-[var(--color-text-secondary)]'}`}>
                 {recording.description}
               </p>
             )}
