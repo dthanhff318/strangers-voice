@@ -165,6 +165,7 @@ export class AudioListenerService {
     // Subscribe to audio chunks from Supabase
     this.channel
       .on("broadcast", { event: "audio_chunk" }, (payload) => {
+        console.log("payload", payload);
         const audioData = payload.payload.audioData as number[];
         if (audioData && this.isPlaying && this.workletNode) {
           // Convert to Float32Array and send to worklet

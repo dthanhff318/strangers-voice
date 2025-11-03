@@ -243,70 +243,70 @@ function MainContent() {
               </div>
             ) : profile && user ? (
               <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="flex items-center gap-2 hover:bg-[var(--color-bg-card)] px-3 py-2 rounded-lg transition-colors"
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 hover:bg-[var(--color-bg-card)] px-3 py-2 rounded-lg transition-colors"
+                  >
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage
+                        src={profile?.avatar_url ?? ""}
+                        alt={profile?.full_name ?? ""}
+                      />
+                      <AvatarFallback className="bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] text-xs">
+                        {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-[var(--color-text-primary)] text-sm font-medium hidden md:block">
+                      {profile?.full_name}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 bg-[var(--color-bg-card)] border-[var(--color-border)]"
                 >
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage
-                      src={profile?.avatar_url ?? ""}
-                      alt={profile?.full_name ?? ""}
-                    />
-                    <AvatarFallback className="bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] text-xs">
-                      {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-[var(--color-text-primary)] text-sm font-medium hidden md:block">
-                    {profile?.full_name}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-56 bg-[var(--color-bg-card)] border-[var(--color-border)]"
-              >
-                <DropdownMenuLabel className="text-[var(--color-text-primary)]">
-                  <p className="font-medium truncate">
-                    {profile?.full_name || "User"}
-                  </p>
-                  <p className="text-[var(--color-text-tertiary)] text-sm font-normal truncate">
-                    {profile?.email}
-                  </p>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-[var(--color-border)]" />
-                {profile?.email === "dthanhff318@gmail.com" && (
+                  <DropdownMenuLabel className="text-[var(--color-text-primary)]">
+                    <p className="font-medium truncate">
+                      {profile?.full_name || "User"}
+                    </p>
+                    <p className="text-[var(--color-text-tertiary)] text-sm font-normal truncate">
+                      {profile?.email}
+                    </p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-[var(--color-border)]" />
+                  {profile?.email === "dthanhff318@gmail.com" && (
+                    <DropdownMenuItem
+                      onClick={handleAdminClick}
+                      className="text-[var(--color-text-tertiary)] focus:bg-[var(--color-bg-elevated)] focus:text-[var(--color-text-primary)]"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      <span>Dashboard</span>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem
-                    onClick={handleAdminClick}
+                    onClick={handleSignOut}
                     className="text-[var(--color-text-tertiary)] focus:bg-[var(--color-bg-elevated)] focus:text-[var(--color-text-primary)]"
                   >
-                    <LayoutDashboard className="w-4 h-4" />
-                    <span>Dashboard</span>
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign out</span>
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  onClick={handleSignOut}
-                  className="text-[var(--color-text-tertiary)] focus:bg-[var(--color-bg-elevated)] focus:text-[var(--color-text-primary)]"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button
-              onClick={() => setShowLoginModal(true)}
-              className="flex items-center gap-2 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] px-4 py-2 rounded-lg transition-all font-medium"
-            >
-              <User className="w-4 h-4" />
-              <span>Sign in</span>
-            </Button>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                onClick={() => setShowLoginModal(true)}
+                className="flex items-center gap-2 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] px-4 py-2 rounded-lg transition-all font-medium"
+              >
+                <User className="w-4 h-4" />
+                <span>Sign in</span>
+              </Button>
             )}
           </div>
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4">
         {/* Routes */}
         <Routes>
           <Route
