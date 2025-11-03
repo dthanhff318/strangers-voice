@@ -87,7 +87,7 @@ export function LiveChat({ roomId }: LiveChatProps) {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from("live_chat_messages")
+        .from("live_chat_messages" as any)
         .select(
           `
           id,
@@ -103,7 +103,7 @@ export function LiveChat({ roomId }: LiveChatProps) {
 
       if (error) throw error;
 
-      setMessages(data as ChatMessage[]);
+      setMessages((data as any) || []);
     } catch (error) {
       console.error("Error loading messages:", error);
       toast.error("Failed to load chat messages");
@@ -125,7 +125,7 @@ export function LiveChat({ roomId }: LiveChatProps) {
 
     try {
       setSending(true);
-      const { error } = await supabase.from("live_chat_messages").insert({
+      const { error } = await supabase.from("live_chat_messages" as any).insert({
         room_id: roomId,
         user_id: user.id,
         message: trimmedMessage,
@@ -140,21 +140,6 @@ export function LiveChat({ roomId }: LiveChatProps) {
     } finally {
       setSending(false);
     }
-  };
-
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-
-    const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
-
-    return date.toLocaleDateString();
   };
 
   if (!user) {
