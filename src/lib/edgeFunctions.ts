@@ -233,3 +233,24 @@ export async function createLiveRoom(title: string, description?: string) {
     };
   }>("create-live-room", { title, description });
 }
+
+/**
+ * Check if current user has an active live room
+ * @returns Active room data if exists, null otherwise
+ */
+export async function getUserActiveRoom() {
+  try {
+    const { data, error } = await supabase
+      .from("live_rooms")
+      .select("id, title, created_at")
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return { data, error: null };
+  } catch (error) {
+    console.error("Error checking user active room:", error);
+    return { data: null, error: error as Error };
+  }
+}

@@ -7,6 +7,17 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { CreateLiveRoomModal } from './CreateLiveRoomModal'
 import { Plus, Users, Radio } from 'lucide-react'
 import { LoginModal } from './LoginModal'
+import { getUserActiveRoom } from '../lib/edgeFunctions'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from './ui/alert-dialog'
 
 export function LiveFeed() {
   const { rooms, loading, error } = useLiveRooms()
@@ -14,13 +25,35 @@ export function LiveFeed() {
   const navigate = useNavigate()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [showActiveRoomAlert, setShowActiveRoomAlert] = useState(false)
+  const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
+  const [checkingRoom, setCheckingRoom] = useState(false)
 
-  const handleCreateLive = () => {
+  const handleCreateLive = async () => {
     if (!user) {
       setShowLoginModal(true)
       return
     }
+
+    // Check if user already has an active room
+    setCheckingRoom(true)
+    const { data: activeRoom } = await getUserActiveRoom()
+    setCheckingRoom(false)
+
+    if (activeRoom) {
+      setActiveRoomId(activeRoom.id)
+      setShowActiveRoomAlert(true)
+      return
+    }
+
     setShowCreateModal(true)
+  }
+
+  const handleGoToActiveRoom = () => {
+    if (activeRoomId) {
+      navigate(`/live/${activeRoomId}`)
+    }
+    setShowActiveRoomAlert(false)
   }
 
   const handleJoinRoom = (roomId: string) => {
@@ -59,9 +92,14 @@ export function LiveFeed() {
             {user && (
               <Button
                 onClick={handleCreateLive}
-                className="bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] gap-2 shadow-lg shadow-[var(--color-accent)]/20 transition-all hover:scale-105"
+                disabled={checkingRoom}
+                className="bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] gap-2 shadow-lg shadow-[var(--color-accent)]/20 transition-all hover:scale-105 disabled:opacity-50"
               >
-                <Plus className="w-5 h-5" />
+                {checkingRoom ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Plus className="w-5 h-5" />
+                )}
                 Go Live
               </Button>
             )}
@@ -134,7 +172,7 @@ export function LiveFeed() {
 
                 {/* Room Info */}
                 <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors">
+                  <h3 className="text-lg font-bold text-[var(--color-text-primary)]">
                     {room.title}
                   </h3>
                   {room.description && (
@@ -165,6 +203,31 @@ export function LiveFeed() {
       {/* Modals */}
       <CreateLiveRoomModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+
+      {/* Active Room Alert */}
+      <AlertDialog open={showActiveRoomAlert} onOpenChange={setShowActiveRoomAlert}>
+        <AlertDialogContent className="bg-[var(--color-bg-card)] border-[var(--color-border)]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[var(--color-text-primary)]">
+              You Already Have an Active Live Room
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[var(--color-text-secondary)]">
+              You can only have one active live room at a time. Would you like to go to your current live room?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] border-[var(--color-border)]">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleGoToActiveRoom}
+              className="bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)]"
+            >
+              Go to Live Room
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

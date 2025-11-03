@@ -193,40 +193,23 @@ export function LiveChat({ roomId }: LiveChatProps) {
           </div>
         ) : (
           messages.map((msg) => {
-            const isOwnMessage = msg.user_id === user.id;
             return (
-              <div
-                key={msg.id}
-                className={`flex gap-3 ${isOwnMessage ? "flex-row-reverse" : ""}`}
-              >
+              <div key={msg.id} className="flex gap-3 items-start">
                 <Avatar className="w-8 h-8 flex-shrink-0">
                   <AvatarImage src={msg.user?.avatar_url || undefined} />
                   <AvatarFallback>
                     {msg.user?.full_name?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
-                <div
-                  className={`flex-1 space-y-1 ${isOwnMessage ? "items-end" : ""}`}
-                >
-                  <div
-                    className={`flex items-baseline gap-2 ${isOwnMessage ? "flex-row-reverse" : ""}`}
-                  >
-                    <p className="text-sm font-medium text-[var(--color-text-primary)]">
-                      {isOwnMessage ? "You" : msg.user?.full_name || "Anonymous"}
-                    </p>
-                    <p className="text-xs text-[var(--color-text-muted)]">
-                      {formatTime(msg.created_at)}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+                      {msg.user?.full_name || "Anonymous"}
                     </p>
                   </div>
-                  <div
-                    className={`inline-block px-4 py-2 rounded-2xl ${
-                      isOwnMessage
-                        ? "bg-[var(--color-accent)] text-white"
-                        : "bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)]"
-                    }`}
-                  >
-                    <p className="text-sm break-words">{msg.message}</p>
-                  </div>
+                  <p className="text-sm text-[var(--color-text-secondary)] break-words mt-0.5">
+                    {msg.message}
+                  </p>
                 </div>
               </div>
             );
@@ -255,7 +238,7 @@ export function LiveChat({ roomId }: LiveChatProps) {
             size="icon"
             className="rounded-full bg-[var(--color-accent)] hover:bg-[var(--color-accent)]/90 disabled:opacity-50"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-4 h-4 text-[var(--color-btn-primary-text)]" />
           </Button>
         </div>
       </form>

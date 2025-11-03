@@ -12,8 +12,8 @@ interface CreateLiveRoomModalProps {
 
 export function CreateLiveRoomModal({ isOpen, onClose }: CreateLiveRoomModalProps) {
   const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const { createRoom, loading } = useLiveRoom()
+  const [isCreating, setIsCreating] = useState(false)
+  const { createRoom } = useLiveRoom()
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -32,23 +32,26 @@ export function CreateLiveRoomModal({ isOpen, onClose }: CreateLiveRoomModalProp
       return
     }
 
-    const roomId = await createRoom({
-      host_id: user.id,
-      title: title.trim(),
-      description: description.trim() || null,
-    })
+    try {
+      setIsCreating(true)
+      const roomId = await createRoom({
+        host_id: user.id,
+        title: title.trim(),
+        description: null,
+      })
 
-    if (roomId) {
-      onClose()
-      setTitle('')
-      setDescription('')
-      navigate(`/live/${roomId}`)
+      if (roomId) {
+        onClose()
+        setTitle('')
+        navigate(`/live/${roomId}`)
+      }
+    } finally {
+      setIsCreating(false)
     }
   }
 
   const handleClose = () => {
     setTitle('')
-    setDescription('')
     onClose()
   }
 
@@ -99,34 +102,11 @@ export function CreateLiveRoomModal({ isOpen, onClose }: CreateLiveRoomModalProp
                 placeholder="What's your live about?"
                 maxLength={100}
                 className="w-full px-4 py-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent transition-all"
-                disabled={loading}
+                disabled={isCreating}
                 required
               />
               <div className="text-xs text-[var(--color-text-muted)] text-right">
                 {title.length}/100
-              </div>
-            </div>
-
-            {/* Description Input */}
-            <div className="space-y-2">
-              <label
-                htmlFor="description"
-                className="text-sm font-medium text-[var(--color-text-secondary)]"
-              >
-                Description (Optional)
-              </label>
-              <textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Add more details about your live..."
-                maxLength={500}
-                rows={4}
-                className="w-full px-4 py-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent transition-all resize-none"
-                disabled={loading}
-              />
-              <div className="text-xs text-[var(--color-text-muted)] text-right">
-                {description.length}/500
               </div>
             </div>
 
@@ -150,17 +130,17 @@ export function CreateLiveRoomModal({ isOpen, onClose }: CreateLiveRoomModalProp
                 onClick={handleClose}
                 variant="outline"
                 className="flex-1"
-                disabled={loading}
+                disabled={isCreating}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 className="flex-1 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)]"
-                disabled={loading}
+                disabled={isCreating}
               >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-[var(--color-text-muted)] border-t-[var(--color-btn-primary-text)] rounded-full animate-spin" />
+                {isCreating ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   'Go Live'
                 )}

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../contexts/AuthContext'
 import { useFollow } from '../hooks/useFollow'
+import { useLoginRequired } from '../App'
 import { getMyRecordings, updateUserInfo } from '../lib/edgeFunctions'
 import { supabase } from '../lib/supabase'
 import { Camera, Edit2, Save, X, Loader2, User as UserIcon, Mic, ArrowLeft, UserPlus, UserCheck, Image } from 'lucide-react'
@@ -36,14 +37,11 @@ interface UserProfile {
   background_id: string | null
 }
 
-interface ProfileProps {
-  onLoginRequired?: () => void
-}
-
-export function Profile({ onLoginRequired }: ProfileProps = {}) {
+export function Profile() {
   const { userId } = useParams<{ userId: string }>()
   const navigate = useNavigate()
   const { user, profile: currentUserProfile, refreshProfile } = useAuth()
+  const { onLoginRequired } = useLoginRequired()
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
   const [saving, setSaving] = useState(false)

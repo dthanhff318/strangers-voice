@@ -365,7 +365,7 @@ export function LiveRoom() {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleEndLive}
-                  className="bg-red-500 hover:bg-red-600"
+                  className="bg-red-500 hover:bg-red-600 !text-[var(--color-btn-primary-text)]"
                 >
                   End Session
                 </AlertDialogAction>

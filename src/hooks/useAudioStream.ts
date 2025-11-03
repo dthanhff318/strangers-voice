@@ -19,6 +19,7 @@ export function useAudioStream(roomId: string, isHost: boolean) {
   useEffect(() => {
     if (!roomId) return;
 
+    console.log("[HOOK] 🔌 Initializing Realtime channel for room:", roomId);
     const channel = supabase.channel(`room:${roomId}`, {
       config: {
         broadcast: {
@@ -28,8 +29,10 @@ export function useAudioStream(roomId: string, isHost: boolean) {
     });
 
     channelRef.current = channel;
+    console.log("[HOOK] ✅ Channel created");
 
     return () => {
+      console.log("[HOOK] Cleaning up channel");
       channel.unsubscribe();
       channelRef.current = null;
     };
@@ -37,8 +40,11 @@ export function useAudioStream(roomId: string, isHost: boolean) {
 
   // Start streaming (for host)
   const startStreaming = useCallback(async () => {
+    console.log("[HOOK] 🎙️ START STREAMING called, isHost:", isHost);
+
     if (!isHost) {
       setError("Only the host can start streaming");
+      console.log("[HOOK] ❌ Not host, cannot stream");
       return;
     }
 
@@ -47,25 +53,30 @@ export function useAudioStream(roomId: string, isHost: boolean) {
 
       // Initialize service if not exists
       if (!streamServiceRef.current) {
+        console.log("[HOOK] Creating AudioStreamService...");
         streamServiceRef.current = new AudioStreamService();
       }
 
       // Request microphone permission and start capture
       await streamServiceRef.current.startCapture();
       setHasPermission(true);
+      console.log("[HOOK] ✅ Microphone captured");
 
       // Subscribe channel before broadcasting
       if (channelRef.current && channelRef.current.state !== "joined") {
+        console.log("[HOOK] Subscribing to channel...");
         await channelRef.current.subscribe();
+        console.log("[HOOK] ✅ Channel subscribed, state:", channelRef.current.state);
       }
 
       // Start broadcasting audio
       if (channelRef.current) {
         await streamServiceRef.current.startBroadcast(channelRef.current);
         setIsStreaming(true);
+        console.log("[HOOK] ✅ STREAMING STARTED!");
       }
     } catch (err) {
-      console.error("Error starting stream:", err);
+      console.error("[HOOK] ❌ Error starting stream:", err);
       setError(
         err instanceof Error ? err.message : "Failed to start streaming"
       );
@@ -85,8 +96,11 @@ export function useAudioStream(roomId: string, isHost: boolean) {
 
   // Start listening (for listeners)
   const startListening = useCallback(async () => {
+    console.log("[HOOK] 🎧 START LISTENING called, isHost:", isHost);
+
     if (isHost) {
       setError("Host should use startStreaming instead");
+      console.log("[HOOK] ❌ Is host, should not listen");
       return;
     }
 
@@ -95,21 +109,25 @@ export function useAudioStream(roomId: string, isHost: boolean) {
 
       // Initialize listener service if not exists
       if (!listenerServiceRef.current) {
+        console.log("[HOOK] Creating AudioListenerService...");
         listenerServiceRef.current = new AudioListenerService();
       }
 
       // Subscribe to channel
       if (channelRef.current && channelRef.current.state !== "joined") {
+        console.log("[HOOK] Subscribing to channel...");
         await channelRef.current.subscribe();
+        console.log("[HOOK] ✅ Channel subscribed, state:", channelRef.current.state);
       }
 
       // Start listening to audio broadcasts
       if (channelRef.current) {
         await listenerServiceRef.current.startListening(channelRef.current);
         setIsStreaming(true);
+        console.log("[HOOK] ✅ LISTENING STARTED!");
       }
     } catch (err) {
-      console.error("Error starting listening:", err);
+      console.error("[HOOK] ❌ Error starting listening:", err);
       setError(
         err instanceof Error ? err.message : "Failed to start listening"
       );

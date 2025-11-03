@@ -5,6 +5,7 @@ import { getTrendingRecordsDashboard } from "../lib/edgeFunctions";
 import { AudioCard } from "./AudioCard";
 import { Sparkles } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { useLoginRequired } from "../App";
 
 interface Recording {
   id: string;
@@ -24,10 +25,6 @@ interface Recording {
   } | null;
 }
 
-interface FeedProps {
-  onLoginRequired?: () => void;
-}
-
 // Helper function to get time-based greeting
 function getTimeBasedGreeting(): string {
   const hour = new Date().getHours();
@@ -43,9 +40,10 @@ function getTimeBasedGreeting(): string {
   }
 }
 
-export function Feed({ onLoginRequired }: FeedProps = {}) {
+export function Feed() {
   const queryClient = useQueryClient();
   const { profile } = useAuth();
+  const { onLoginRequired } = useLoginRequired();
 
   // Use React Query for data fetching with caching
   const {

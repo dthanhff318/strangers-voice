@@ -30,6 +30,7 @@ export class AudioStreamService {
 
   async startCapture(): Promise<MediaStream> {
     try {
+      console.log("[BROADCAST] 🎤 Requesting microphone access...");
       this.mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           sampleRate: this.config.sampleRate,
@@ -41,9 +42,10 @@ export class AudioStreamService {
         video: false,
       });
 
+      console.log("[BROADCAST] ✅ Microphone access granted");
       return this.mediaStream;
     } catch (error) {
-      console.error("Error accessing microphone:", error);
+      console.error("[BROADCAST] ❌ Error accessing microphone:", error);
       throw new Error("Failed to access microphone. Please check permissions.");
     }
   }
@@ -53,18 +55,23 @@ export class AudioStreamService {
       throw new Error("Media stream not initialized. Call startCapture first.");
     }
 
+    console.log("[BROADCAST] 📡 Starting broadcast...");
     this.channel = channel;
     this.audioContext = new AudioContext({
       sampleRate: this.config.sampleRate,
     });
+    console.log("[BROADCAST] AudioContext created, state:", this.audioContext.state);
+
     this.mediaStreamSource = this.audioContext.createMediaStreamSource(
       this.mediaStream
     );
 
     // Load AudioWorklet module
+    console.log("[BROADCAST] Loading AudioWorklet module...");
     await this.audioContext.audioWorklet.addModule(
       "/audio-broadcast-processor.js"
     );
+    console.log("[BROADCAST] ✅ AudioWorklet module loaded");
 
     // Create AudioWorkletNode
     this.workletNode = new AudioWorkletNode(
@@ -76,13 +83,20 @@ export class AudioStreamService {
         channelCount: this.config.channelCount!,
       }
     );
+    console.log("[BROADCAST] AudioWorkletNode created");
 
+    let chunkCount = 0;
     // Listen for audio data from the worklet
     this.workletNode.port.onmessage = (event) => {
       if (!this.isStreaming) return;
 
       // Convert ArrayBuffer back to Float32Array, then to regular array for JSON
       const audioData = Array.from(new Float32Array(event.data.audioData));
+      chunkCount++;
+
+      if (chunkCount % 100 === 0) {
+        console.log(`[BROADCAST] 📤 Sent ${chunkCount} audio chunks, data size:`, audioData.length);
+      }
 
       // Broadcast audio chunks via Supabase Realtime
       this.channel?.send({
@@ -96,9 +110,11 @@ export class AudioStreamService {
     this.mediaStreamSource.connect(this.workletNode);
     this.workletNode.connect(this.audioContext.destination);
     this.isStreaming = true;
+    console.log("[BROADCAST] ✅ Broadcasting started successfully");
   }
 
   stopBroadcast(): void {
+    console.log("[BROADCAST] 🛑 Stopping broadcast...");
     this.isStreaming = false;
 
     if (this.workletNode) {
@@ -123,6 +139,7 @@ export class AudioStreamService {
     }
 
     this.channel = null;
+    console.log("[BROADCAST] ✅ Broadcast stopped");
   }
 
   isActive(): boolean {
@@ -139,13 +156,17 @@ export class AudioListenerService {
   constructor() {}
 
   async startListening(channel: RealtimeChannel): Promise<void> {
+    console.log("[LISTENER] 🎧 Starting listening...");
     this.channel = channel;
     this.audioContext = new AudioContext({ sampleRate: 44100 });
+    console.log("[LISTENER] AudioContext created, state:", this.audioContext.state);
 
     // Load AudioWorklet module
+    console.log("[LISTENER] Loading AudioWorklet module...");
     await this.audioContext.audioWorklet.addModule(
       "/audio-playback-processor.js"
     );
+    console.log("[LISTENER] ✅ AudioWorklet module loaded");
 
     // Create AudioWorkletNode for playback
     this.workletNode = new AudioWorkletNode(
@@ -157,15 +178,24 @@ export class AudioListenerService {
         channelCount: 1,
       }
     );
+    console.log("[LISTENER] AudioWorkletNode created");
 
     // Connect to audio destination (speakers)
     this.workletNode.connect(this.audioContext.destination);
     this.isPlaying = true;
 
+    let receivedCount = 0;
     // Subscribe to audio chunks from Supabase
     this.channel
       .on("broadcast", { event: "audio_chunk" }, (payload) => {
-        console.log("payload", payload);
+        receivedCount++;
+        if (receivedCount === 1) {
+          console.log("[LISTENER] 📥 First audio chunk received!");
+        }
+        if (receivedCount % 100 === 0) {
+          console.log(`[LISTENER] 📥 Received ${receivedCount} audio chunks`);
+        }
+
         const audioData = payload.payload.audioData as number[];
         if (audioData && this.isPlaying && this.workletNode) {
           // Convert to Float32Array and send to worklet
@@ -176,9 +206,12 @@ export class AudioListenerService {
         }
       })
       .subscribe();
+
+    console.log("[LISTENER] ✅ Listening started successfully");
   }
 
   stopListening(): void {
+    console.log("[LISTENER] 🛑 Stopping listening...");
     this.isPlaying = false;
 
     if (this.channel) {
@@ -196,6 +229,8 @@ export class AudioListenerService {
       this.audioContext.close();
       this.audioContext = null;
     }
+
+    console.log("[LISTENER] ✅ Listening stopped");
   }
 
   isActive(): boolean {
