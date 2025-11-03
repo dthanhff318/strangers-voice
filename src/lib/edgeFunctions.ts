@@ -151,3 +151,85 @@ export async function getRecommendedUsers() {
     }[];
   }>("get-recommended-users");
 }
+
+/**
+ * End a live room (host only)
+ * @param roomId - The ID of the live room to end
+ * @returns Success status
+ */
+export async function endLiveRoom(roomId: string) {
+  return callEdgeFunction<{
+    success: boolean;
+    message: string;
+  }>("end-live-room", { roomId });
+}
+
+/**
+ * Get a single live room by ID with host profile
+ * @param roomId - The ID of the live room to fetch
+ * @returns Live room data with host information
+ */
+export async function getLiveRoom(roomId: string) {
+  return callEdgeFunction<{
+    data: {
+      id: string;
+      title: string;
+      description: string | null;
+      host_id: string;
+      is_active: boolean;
+      listeners_count: number;
+      created_at: string;
+      ended_at: string | null;
+      host: {
+        id: string;
+        full_name: string | null;
+        avatar_url: string | null;
+      };
+    };
+  }>("get-live-room", { roomId });
+}
+
+/**
+ * Get all active live rooms with host profiles
+ * @returns List of active live rooms
+ */
+export async function getLiveRooms() {
+  return callEdgeFunction<{
+    data: {
+      id: string;
+      title: string;
+      description: string | null;
+      host_id: string;
+      is_active: boolean;
+      listeners_count: number;
+      created_at: string;
+      ended_at: string | null;
+      host: {
+        id: string;
+        full_name: string | null;
+        avatar_url: string | null;
+      };
+    }[];
+  }>("get-live-rooms");
+}
+
+/**
+ * Create a new live room
+ * @param title - Title of the live room
+ * @param description - Optional description
+ * @returns Created live room data
+ */
+export async function createLiveRoom(title: string, description?: string) {
+  return callEdgeFunction<{
+    data: {
+      id: string;
+      title: string;
+      description: string | null;
+      host_id: string;
+      is_active: boolean;
+      listeners_count: number;
+      created_at: string;
+      ended_at: string | null;
+    };
+  }>("create-live-room", { title, description });
+}

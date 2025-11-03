@@ -146,12 +146,67 @@ export interface Database {
           }
         ]
       }
+      live_rooms: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          host_id: string
+          title: string
+          description: string | null
+          is_active: boolean
+          listeners_count: number
+          ended_at: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          host_id: string
+          title: string
+          description?: string | null
+          is_active?: boolean
+          listeners_count?: number
+          ended_at?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          host_id?: string
+          title?: string
+          description?: string | null
+          is_active?: boolean
+          listeners_count?: number
+          ended_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_rooms_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_listeners: {
+        Args: {
+          room_id: string
+        }
+        Returns: void
+      }
+      decrement_listeners: {
+        Args: {
+          room_id: string
+        }
+        Returns: void
+      }
     }
     Enums: {
       [_ in never]: never

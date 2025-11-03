@@ -7,21 +7,15 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { AudioRecorder } from "./components/AudioRecorder";
 import { Feed } from "./components/Feed";
 import { BottomNav } from "./components/BottomNav";
 import { LoginModal } from "./components/LoginModal";
 import { OnboardingModal } from "./components/OnboardingModal";
 import { LoadingScreen } from "./components/LoadingScreen";
+import { VoiceActionDrawer } from "./components/VoiceActionDrawer";
 import { Toaster } from "@/components/ui/sonner";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,9 +29,11 @@ import { Follow } from "./components/Follow";
 import { Settings } from "./components/Settings";
 import { Admin } from "./components/Admin";
 import { RecordPlayerModal } from "./components/RecordPlayerModal";
+import { LiveRoom } from "./components/LiveRoom";
 import { useAuth } from "./contexts/AuthContext";
 import { LogOut, User, LayoutDashboard } from "lucide-react";
 import "./App.css";
+import { LiveFeed } from "@/components/LiveFeed";
 
 type NavTab = "home" | "follow" | "profile" | "settings" | "admin";
 
@@ -68,7 +64,7 @@ function MainContent() {
         setLoadingProgress(10);
 
         // Simulate some initial loading time
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         setLoadingProgress(30);
 
         // Home page - prefetch trending recordings
@@ -78,7 +74,9 @@ function MainContent() {
           await queryClient.prefetchQuery({
             queryKey: ["trending-recordings"],
             queryFn: async () => {
-              const { getTrendingRecordsDashboard } = await import("./lib/edgeFunctions");
+              const { getTrendingRecordsDashboard } = await import(
+                "./lib/edgeFunctions"
+              );
               const { data, error } = await getTrendingRecordsDashboard();
               if (error) throw error;
               return data?.data || [];
@@ -114,9 +112,8 @@ function MainContent() {
         }
 
         // Final step - ensure minimum display time
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
         setLoadingProgress(100);
-
       } catch (error) {
         console.error("Error prefetching data:", error);
         // Even on error, complete loading to not block UI
@@ -220,14 +217,32 @@ function MainContent() {
             </span>
           </div>
 
-          {/* User Menu */}
-          {loading ? (
-            <div className="flex items-center gap-2 px-3 py-2">
-              <div className="w-8 h-8 rounded-full bg-[var(--color-bg-card)] animate-pulse" />
-              <div className="hidden md:block w-24 h-4 bg-[var(--color-bg-card)] rounded animate-pulse" />
-            </div>
-          ) : profile && user ? (
-            <DropdownMenu>
+          <div className="flex items-center gap-3">
+            {/* Live Button - Only show when user is logged in */}
+            {user && (
+              <Button
+                onClick={() => navigate("/live")}
+                variant="ghost"
+                className="flex items-center gap-2 hover:bg-[var(--color-bg-card)] px-3 py-2 rounded-lg transition-colors"
+              >
+                <div className="relative">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  <div className="absolute inset-0 w-2 h-2 bg-red-500 rounded-full animate-ping" />
+                </div>
+                <span className="text-[var(--color-text-primary)] text-sm font-medium">
+                  Live
+                </span>
+              </Button>
+            )}
+
+            {/* User Menu */}
+            {loading ? (
+              <div className="flex items-center gap-2 px-3 py-2">
+                <div className="w-8 h-8 rounded-full bg-[var(--color-bg-card)] animate-pulse" />
+                <div className="hidden md:block w-24 h-4 bg-[var(--color-bg-card)] rounded animate-pulse" />
+              </div>
+            ) : profile && user ? (
+              <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -286,7 +301,8 @@ function MainContent() {
               <User className="w-4 h-4" />
               <span>Sign in</span>
             </Button>
-          )}
+            )}
+          </div>
         </div>
       </nav>
 
@@ -297,9 +313,7 @@ function MainContent() {
             path="/"
             element={
               <div className="animate-in fade-in duration-500">
-                <Feed
-                  onLoginRequired={() => setShowLoginModal(true)}
-                />
+                <Feed onLoginRequired={() => setShowLoginModal(true)} />
               </div>
             }
           />
@@ -311,6 +325,15 @@ function MainContent() {
               </div>
             }
           />
+          <Route
+            path="/live"
+            element={
+              <div className="animate-in fade-in duration-500">
+                <LiveFeed />
+              </div>
+            }
+          />
+          <Route path="/live/:roomId" element={<LiveRoom />} />
           <Route
             path="/profile"
             element={
@@ -359,21 +382,12 @@ function MainContent() {
         <OnboardingModal user={user} onComplete={handleOnboardingComplete} />
       )}
 
-      {/* Recorder Drawer */}
-      <Drawer open={showRecorder} onOpenChange={setShowRecorder}>
-        <DrawerContent className="bg-[var(--color-bg-card)] border-t border-[var(--color-border)]">
-          <div className="max-w-2xl mx-auto w-full">
-            <DrawerHeader className="pb-2">
-              <DrawerTitle className="text-[var(--color-text-primary)] text-base">
-                Record Your Voice
-              </DrawerTitle>
-            </DrawerHeader>
-            <div className="px-4 pb-4">
-              <AudioRecorder onUploadSuccess={handleUploadSuccess} />
-            </div>
-          </div>
-        </DrawerContent>
-      </Drawer>
+      {/* Voice Action Drawer (Record & Live) */}
+      <VoiceActionDrawer
+        isOpen={showRecorder}
+        onClose={() => setShowRecorder(false)}
+        onUploadSuccess={handleUploadSuccess}
+      />
 
       {/* Toast Notifications */}
       <Toaster />

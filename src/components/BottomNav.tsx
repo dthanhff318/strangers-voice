@@ -1,15 +1,19 @@
-import { Home, Users, Mic, User, Settings } from 'lucide-react'
-import { Button } from './ui/button'
+import { Home, Users, Mic, User, Settings } from "lucide-react";
+import { Button } from "./ui/button";
 
-type NavTab = 'home' | 'follow' | 'profile' | 'settings' | 'admin'
+type NavTab = "home" | "follow" | "profile" | "settings" | "admin";
 
 interface BottomNavProps {
-  activeTab: NavTab
-  onTabChange: (tab: NavTab) => void
-  onRecordClick: () => void
+  activeTab: NavTab;
+  onTabChange: (tab: NavTab) => void;
+  onRecordClick: () => void;
 }
 
-export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavProps) {
+export function BottomNav({
+  activeTab,
+  onTabChange,
+  onRecordClick,
+}: BottomNavProps) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50">
       {/* Gradient overlay */}
@@ -22,23 +26,27 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
             {/* Home Button */}
             <Button
               variant="ghost"
-              onClick={() => onTabChange('home')}
+              onClick={() => onTabChange("home")}
               className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 h-auto ${
-                activeTab === 'home'
-                  ? 'text-[var(--color-text-primary)]'
-                  : 'text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]'
+                activeTab === "home"
+                  ? "text-[var(--color-text-primary)]"
+                  : "text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]"
               }`}
             >
               <Home
                 className={`w-6 h-6 transition-all duration-300 ${
-                  activeTab === 'home'
-                    ? 'fill-[var(--color-accent-primary)] scale-110'
-                    : 'group-hover:scale-105'
+                  activeTab === "home"
+                    ? "fill-[var(--color-accent-primary)] scale-110"
+                    : "group-hover:scale-105"
                 }`}
               />
-              <span className={`text-xs font-medium transition-all duration-300 ${
-                activeTab === 'home' ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'
-              }`}>
+              <span
+                className={`text-xs font-medium transition-all duration-300 ${
+                  activeTab === "home"
+                    ? "opacity-100"
+                    : "opacity-70 group-hover:opacity-100"
+                }`}
+              >
                 Home
               </span>
             </Button>
@@ -46,23 +54,27 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
             {/* Follow Button */}
             <Button
               variant="ghost"
-              onClick={() => onTabChange('follow')}
+              onClick={() => onTabChange("follow")}
               className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 h-auto ${
-                activeTab === 'follow'
-                  ? 'text-[var(--color-text-primary)]'
-                  : 'text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]'
+                activeTab === "follow"
+                  ? "text-[var(--color-text-primary)]"
+                  : "text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]"
               }`}
             >
               <Users
                 className={`w-6 h-6 transition-all duration-300 ${
-                  activeTab === 'follow'
-                    ? 'fill-[var(--color-accent-primary)] scale-110'
-                    : 'group-hover:scale-105'
+                  activeTab === "follow"
+                    ? "fill-[var(--color-accent-primary)] scale-110"
+                    : "group-hover:scale-105"
                 }`}
               />
-              <span className={`text-xs font-medium transition-all duration-300 ${
-                activeTab === 'follow' ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'
-              }`}>
+              <span
+                className={`text-xs font-medium transition-all duration-300 ${
+                  activeTab === "follow"
+                    ? "opacity-100"
+                    : "opacity-70 group-hover:opacity-100"
+                }`}
+              >
                 Follow
               </span>
             </Button>
@@ -79,7 +91,10 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
 
                 {/* Button */}
                 <div className="relative w-14 h-14 rounded-full bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] flex items-center justify-center shadow-2xl shadow-[var(--shadow-primary)] transition-all duration-300 group-hover:scale-110 group-active:scale-95 border-4 border-[var(--color-bg-primary)]">
-                  <Mic className="w-6 h-6 text-[var(--color-btn-primary-text)] group-hover:scale-110 transition-transform duration-300" fill="var(--color-btn-primary-text)" />
+                  <Mic
+                    className="w-6 h-6 text-[var(--color-btn-primary-text)] group-hover:scale-110 transition-transform duration-300"
+                    fill="var(--color-btn-primary-text)"
+                  />
                 </div>
               </div>
               <span className="text-xs font-medium text-[var(--color-text-primary)] mt-1 group-hover:scale-105 transition-transform duration-300">
@@ -90,23 +105,27 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
             {/* Profile Button */}
             <Button
               variant="ghost"
-              onClick={() => onTabChange('profile')}
+              onClick={() => onTabChange("profile")}
               className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 h-auto ${
-                activeTab === 'profile'
-                  ? 'text-[var(--color-text-primary)]'
-                  : 'text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]'
+                activeTab === "profile"
+                  ? "text-[var(--color-text-primary)]"
+                  : "text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]"
               }`}
             >
               <User
                 className={`w-6 h-6 transition-all duration-300 ${
-                  activeTab === 'profile'
-                    ? 'fill-[var(--color-accent-primary)] scale-110'
-                    : 'group-hover:scale-105'
+                  activeTab === "profile"
+                    ? "fill-[var(--color-accent-primary)] scale-110"
+                    : "group-hover:scale-105"
                 }`}
               />
-              <span className={`text-xs font-medium transition-all duration-300 ${
-                activeTab === 'profile' ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'
-              }`}>
+              <span
+                className={`text-xs font-medium transition-all duration-300 ${
+                  activeTab === "profile"
+                    ? "opacity-100"
+                    : "opacity-70 group-hover:opacity-100"
+                }`}
+              >
                 Profile
               </span>
             </Button>
@@ -114,23 +133,27 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
             {/* Settings Button */}
             <Button
               variant="ghost"
-              onClick={() => onTabChange('settings')}
+              onClick={() => onTabChange("settings")}
               className={`group flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-all duration-300 h-auto ${
-                activeTab === 'settings'
-                  ? 'text-[var(--color-text-primary)]'
-                  : 'text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]'
+                activeTab === "settings"
+                  ? "text-[var(--color-text-primary)]"
+                  : "text-[var(--color-inactive)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-subtle)]"
               }`}
             >
               <Settings
                 className={`w-6 h-6 transition-all duration-300 ${
-                  activeTab === 'settings'
-                    ? 'fill-[var(--color-accent-primary)] scale-110'
-                    : 'group-hover:scale-105'
+                  activeTab === "settings"
+                    ? "fill-[var(--color-accent-primary)] scale-110"
+                    : "group-hover:scale-105"
                 }`}
               />
-              <span className={`text-xs font-medium transition-all duration-300 ${
-                activeTab === 'settings' ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'
-              }`}>
+              <span
+                className={`text-xs font-medium transition-all duration-300 ${
+                  activeTab === "settings"
+                    ? "opacity-100"
+                    : "opacity-70 group-hover:opacity-100"
+                }`}
+              >
                 Settings
               </span>
             </Button>
@@ -138,5 +161,5 @@ export function BottomNav({ activeTab, onTabChange, onRecordClick }: BottomNavPr
         </div>
       </div>
     </nav>
-  )
+  );
 }

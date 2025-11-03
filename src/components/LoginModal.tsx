@@ -42,24 +42,24 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 cursor-pointer"
+        className="fixed inset-0 bg-[var(--color-bg-primary)]/95 backdrop-blur-md z-50 cursor-pointer"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
-          className="bg-gray-900 rounded-3xl shadow-2xl border border-gray-700 w-full max-w-md pointer-events-auto"
+          className="bg-[var(--color-bg-card)] rounded-3xl shadow-2xl border border-[var(--color-border)] w-full max-w-md pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="relative flex items-center justify-center py-6 border-b border-gray-800">
-            <h2 className="text-xl font-semibold text-white">Welcome to Stranger Voice</h2>
+          <div className="relative flex items-center justify-center py-6 border-b border-[var(--color-border)]">
+            <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">Welcome to YMelody!</h2>
             <Button
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="absolute right-4 p-2 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-gray-800"
+              className="absolute right-4 p-2 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors rounded-full hover:bg-[var(--color-bg-card-hover)]"
             >
               <X className="w-5 h-5" />
             </Button>
@@ -69,11 +69,11 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           <div className="p-8 space-y-6">
             {/* Logo/Icon Section */}
             <div className="text-center space-y-3">
-              <div className="w-20 h-20 mx-auto bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/50">
-                <span className="text-4xl">🎙️</span>
+              <div className="w-20 h-20 mx-auto bg-[var(--color-btn-primary)] rounded-full flex items-center justify-center shadow-lg shadow-[var(--shadow-primary)]">
+                <img src="/favicon.png" className="w-12 h-12 logo-invert" alt="YMelody" />
               </div>
-              <p className="text-gray-400 text-sm">
-                Share your voice with the world
+              <p className="text-[var(--color-text-tertiary)] text-sm">
+                Share your voice, connect with the world
               </p>
             </div>
 
@@ -81,10 +81,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <Button
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full bg-white hover:bg-gray-50 text-gray-900 font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-[var(--color-text-muted)] border-t-[var(--color-btn-primary-text)] rounded-full animate-spin" />
               ) : (
                 <>
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -113,30 +113,30 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-800"></div>
+                <div className="w-full border-t border-[var(--color-border)]"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 text-gray-500 bg-gray-900">Why sign in?</span>
+                <span className="px-4 text-[var(--color-text-muted)] bg-[var(--color-bg-card)]">Why sign in?</span>
               </div>
             </div>
 
             {/* Benefits */}
-            <div className="space-y-3 text-sm text-gray-400">
+            <div className="space-y-3 text-sm text-[var(--color-text-tertiary)]">
               <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-indigo-400 text-xs">✓</span>
+                <div className="w-5 h-5 rounded-full bg-[var(--color-accent-subtle)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-[var(--color-text-primary)] text-xs">✓</span>
                 </div>
                 <span>Record and share your audio stories</span>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-indigo-400 text-xs">✓</span>
+                <div className="w-5 h-5 rounded-full bg-[var(--color-accent-subtle)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-[var(--color-text-primary)] text-xs">✓</span>
                 </div>
                 <span>Like and interact with others</span>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-indigo-400 text-xs">✓</span>
+                <div className="w-5 h-5 rounded-full bg-[var(--color-accent-subtle)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-[var(--color-text-primary)] text-xs">✓</span>
                 </div>
                 <span>Build your voice community</span>
               </div>
@@ -144,8 +144,8 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           </div>
 
           {/* Footer */}
-          <div className="px-8 py-6 border-t border-gray-800 text-center">
-            <p className="text-xs text-gray-500">
+          <div className="px-8 py-6 border-t border-[var(--color-border)] text-center">
+            <p className="text-xs text-[var(--color-text-muted)]">
               By continuing, you agree to our Terms of Service and Privacy Policy
             </p>
           </div>
