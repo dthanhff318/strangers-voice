@@ -4,6 +4,7 @@ import { getRecommendedUsers } from "../lib/edgeFunctions";
 import { Search, Users, Loader2, Mic } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { UserProfileModal } from "./UserProfileModal";
+import { Loading } from "./Loading";
 import { debounce } from "lodash";
 
 interface UserProfile {
@@ -174,7 +175,7 @@ export function Follow() {
 
             {loadingRecommended ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-[var(--color-text-tertiary)] animate-spin" />
+                <Loading variant="ring" size={32} />
               </div>
             ) : recommendedUsers.length === 0 ? (
               <div className="text-center py-12 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]">

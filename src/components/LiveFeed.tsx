@@ -8,6 +8,7 @@ import { CreateLiveRoomModal } from './CreateLiveRoomModal'
 import { Plus, Users, Radio } from 'lucide-react'
 import { LoginModal } from './LoginModal'
 import { getUserActiveRoom } from '../lib/edgeFunctions'
+import { Loading } from './Loading'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -88,10 +89,7 @@ export function LiveFeed() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[50vh]">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-[var(--color-text-secondary)]">Loading live rooms...</p>
-        </div>
+        <Loading variant="ring" size={48} label="Loading live rooms..." />
       </div>
     )
   }

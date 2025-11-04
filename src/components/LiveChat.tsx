@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Send } from "lucide-react";
 import { toast } from "sonner";
+import { Loading } from "./Loading";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 interface ChatMessage {
@@ -168,7 +169,7 @@ export function LiveChat({ roomId }: LiveChatProps) {
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 min-h-0">
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="w-8 h-8 border-4 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
+            <Loading variant="ring" size={32} />
           </div>
         ) : messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">

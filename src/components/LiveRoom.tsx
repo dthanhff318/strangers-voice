@@ -19,6 +19,7 @@ import { Volume2, VolumeX, Users, ArrowLeft, Mic, MicOff } from "lucide-react";
 import { toast } from "sonner";
 import { endLiveRoom } from "../lib/edgeFunctions";
 import { LiveChat } from "./LiveChat";
+import { Loading } from "./Loading";
 
 export function LiveRoom() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -173,12 +174,7 @@ export function LiveRoom() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-[var(--color-bg-primary)]">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-[var(--color-text-secondary)]">
-            Loading live room...
-          </p>
-        </div>
+        <Loading variant="ring" size={48} label="Loading live room..." />
       </div>
     );
   }
