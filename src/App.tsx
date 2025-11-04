@@ -19,6 +19,7 @@ import { Admin } from "./components/Admin";
 import { RecordPlayerModal } from "./components/RecordPlayerModal";
 import { LiveRoom } from "./components/LiveRoom";
 import { Layout } from "./components/Layout";
+import { Upgrade } from "./components/Upgrade";
 import { useAuth } from "./contexts/AuthContext";
 import "./App.css";
 import { LiveFeed } from "@/components/LiveFeed";
@@ -212,6 +213,14 @@ function MainContent() {
             element={
               <div className="animate-in fade-in duration-500">
                 <Settings />
+              </div>
+            }
+          />
+          <Route
+            path="/upgrade"
+            element={
+              <div className="animate-in fade-in duration-500">
+                <Upgrade />
               </div>
             }
           />

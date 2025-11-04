@@ -35,7 +35,10 @@ serve(async (req) => {
           id,
           full_name,
           avatar_url,
-          background_id
+          background_id,
+          plan:plans(
+            badge_color
+          )
         )
       `
       )

@@ -84,6 +84,10 @@ export interface Database {
           email: string | null;
           full_name: string | null;
           avatar_url: string | null;
+          background_id: string | null;
+          current_plan_id: string | null;
+          plan_upgraded_at: string | null;
+          plan_expires_at: string | null;
         };
         Insert: {
           id: string;
@@ -91,6 +95,10 @@ export interface Database {
           email?: string | null;
           full_name?: string | null;
           avatar_url?: string | null;
+          background_id?: string | null;
+          current_plan_id?: string | null;
+          plan_upgraded_at?: string | null;
+          plan_expires_at?: string | null;
         };
         Update: {
           id?: string;
@@ -98,8 +106,20 @@ export interface Database {
           email?: string | null;
           full_name?: string | null;
           avatar_url?: string | null;
+          background_id?: string | null;
+          current_plan_id?: string | null;
+          plan_upgraded_at?: string | null;
+          plan_expires_at?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "profiles_current_plan_id_fkey";
+            columns: ["current_plan_id"];
+            isOneToOne: false;
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       reports: {
         Row: {
@@ -228,6 +248,45 @@ export interface Database {
             referencedColumns: ["id"];
           }
         ];
+      };
+      plans: {
+        Row: {
+          id: string;
+          created_at: string;
+          name: string;
+          display_name: string;
+          description: string | null;
+          price: number;
+          features: Json;
+          badge_color: string;
+          sort_order: number;
+          is_active: boolean;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          name: string;
+          display_name: string;
+          description?: string | null;
+          price?: number;
+          features?: Json;
+          badge_color: string;
+          sort_order?: number;
+          is_active?: boolean;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          name?: string;
+          display_name?: string;
+          description?: string | null;
+          price?: number;
+          features?: Json;
+          badge_color?: string;
+          sort_order?: number;
+          is_active?: boolean;
+        };
+        Relationships: [];
       };
     };
     Views: {
