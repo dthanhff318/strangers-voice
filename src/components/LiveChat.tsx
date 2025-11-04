@@ -88,7 +88,7 @@ export function LiveChat({ roomId }: LiveChatProps) {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from("live_chat_messages" as any)
+        .from("live_chat_messages")
         .select(
           `
           id,
@@ -104,7 +104,7 @@ export function LiveChat({ roomId }: LiveChatProps) {
 
       if (error) throw error;
 
-      setMessages((data as any) || []);
+      setMessages(data || []);
     } catch (error) {
       console.error("Error loading messages:", error);
       toast.error("Failed to load chat messages");
@@ -126,11 +126,13 @@ export function LiveChat({ roomId }: LiveChatProps) {
 
     try {
       setSending(true);
-      const { error } = await supabase.from("live_chat_messages" as any).insert({
-        room_id: roomId,
-        user_id: user.id,
-        message: trimmedMessage,
-      });
+      const { error } = await supabase
+        .from("live_chat_messages")
+        .insert({
+          room_id: roomId,
+          user_id: user.id,
+          message: trimmedMessage,
+        });
 
       if (error) throw error;
 
@@ -224,7 +226,7 @@ export function LiveChat({ roomId }: LiveChatProps) {
             size="icon"
             className="rounded-full bg-[var(--color-accent)] hover:bg-[var(--color-accent)]/90 disabled:opacity-50"
           >
-            <Send className="w-4 h-4 text-[var(--color-btn-primary-text)]" />
+            <Send className="w-4 h-4 text-[var(--color-text-primary)]" />
           </Button>
         </div>
       </form>
