@@ -114,36 +114,6 @@ export function useLiveRoom(roomId?: string) {
     [updateRoom]
   );
 
-  const incrementListeners = useCallback(
-    async (id: string) => {
-      try {
-        const { error } = await supabase.rpc("increment_listeners", {
-          room_id: id,
-        });
-        if (error) throw error;
-        queryClient.invalidateQueries({ queryKey: ["live-room", id] });
-      } catch (err) {
-        console.error("Error incrementing listeners:", err);
-      }
-    },
-    [queryClient]
-  );
-
-  const decrementListeners = useCallback(
-    async (id: string) => {
-      try {
-        const { error } = await supabase.rpc("decrement_listeners", {
-          room_id: id,
-        });
-        if (error) throw error;
-        queryClient.invalidateQueries({ queryKey: ["live-room", id] });
-      } catch (err) {
-        console.error("Error decrementing listeners:", err);
-      }
-    },
-    [queryClient]
-  );
-
   return {
     room: room || null,
     loading,
@@ -152,8 +122,6 @@ export function useLiveRoom(roomId?: string) {
     updateRoom,
     endRoom,
     refetch,
-    incrementListeners,
-    decrementListeners,
   };
 }
 

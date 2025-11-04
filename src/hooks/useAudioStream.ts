@@ -6,16 +6,22 @@ import {
 } from "../lib/audioStreaming";
 import { supabase } from "../lib/supabase";
 
-export function useAudioStream(roomId: string, isHost: boolean) {
+export function useAudioStream(
+  roomId: string,
+  isHost: boolean,
+  userId?: string,
+  onListenersCountChange?: (count: number) => void
+) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasPermission, setHasPermission] = useState(false);
+  const [listenersCount, setListenersCount] = useState(0);
 
   const streamServiceRef = useRef<AudioStreamService | null>(null);
   const listenerServiceRef = useRef<AudioListenerService | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
-  // Initialize channel
+  // Initialize channel with presence
   useEffect(() => {
     if (!roomId) return;
 
@@ -25,8 +31,34 @@ export function useAudioStream(roomId: string, isHost: boolean) {
         broadcast: {
           self: false, // Don't receive own broadcasts
         },
+        presence: {
+          key: userId || "anonymous", // Unique key for this user
+        },
       },
     });
+
+    // Listen to presence changes
+    channel
+      .on("presence", { event: "sync" }, () => {
+        const presenceState = channel.presenceState();
+        console.log("[HOOK] 👥 Presence sync:", presenceState);
+
+        // Count listeners (exclude host)
+        const listeners = Object.values(presenceState).filter(
+          (presences: any) => presences[0]?.role === "listener"
+        );
+        const count = listeners.length;
+        console.log("[HOOK] 📊 Listeners count:", count);
+
+        setListenersCount(count);
+        onListenersCountChange?.(count);
+      })
+      .on("presence", { event: "join" }, ({ newPresences }) => {
+        console.log("[HOOK] ➕ User joined:", newPresences);
+      })
+      .on("presence", { event: "leave" }, ({ leftPresences }) => {
+        console.log("[HOOK] ➖ User left:", leftPresences);
+      });
 
     channelRef.current = channel;
     console.log("[HOOK] ✅ Channel created");
@@ -36,7 +68,7 @@ export function useAudioStream(roomId: string, isHost: boolean) {
       channel.unsubscribe();
       channelRef.current = null;
     };
-  }, [roomId]);
+  }, [roomId, userId, onListenersCountChange]);
 
   // Start streaming (for host)
   const startStreaming = useCallback(async () => {
@@ -69,6 +101,17 @@ export function useAudioStream(roomId: string, isHost: boolean) {
         console.log("[HOOK] ✅ Channel subscribed, state:", channelRef.current.state);
       }
 
+      // Track presence as host
+      if (channelRef.current && userId) {
+        console.log("[HOOK] 📍 Tracking presence as host...");
+        await channelRef.current.track({
+          user_id: userId,
+          role: "host",
+          online_at: new Date().toISOString(),
+        });
+        console.log("[HOOK] ✅ Presence tracked");
+      }
+
       // Start broadcasting audio
       if (channelRef.current) {
         await streamServiceRef.current.startBroadcast(channelRef.current);
@@ -82,13 +125,17 @@ export function useAudioStream(roomId: string, isHost: boolean) {
       );
       setIsStreaming(false);
     }
-  }, [isHost]);
+  }, [isHost, userId]);
 
   // Stop streaming (for host)
   const stopStreaming = useCallback(() => {
     if (streamServiceRef.current) {
       streamServiceRef.current.stopBroadcast();
       streamServiceRef.current = null;
+    }
+    // Untrack presence
+    if (channelRef.current) {
+      channelRef.current.untrack();
     }
     setIsStreaming(false);
     setHasPermission(false);
@@ -120,6 +167,17 @@ export function useAudioStream(roomId: string, isHost: boolean) {
         console.log("[HOOK] ✅ Channel subscribed, state:", channelRef.current.state);
       }
 
+      // Track presence as listener
+      if (channelRef.current && userId) {
+        console.log("[HOOK] 📍 Tracking presence as listener...");
+        await channelRef.current.track({
+          user_id: userId,
+          role: "listener",
+          online_at: new Date().toISOString(),
+        });
+        console.log("[HOOK] ✅ Presence tracked");
+      }
+
       // Start listening to audio broadcasts
       if (channelRef.current) {
         await listenerServiceRef.current.startListening(channelRef.current);
@@ -133,13 +191,17 @@ export function useAudioStream(roomId: string, isHost: boolean) {
       );
       setIsStreaming(false);
     }
-  }, [isHost]);
+  }, [isHost, userId]);
 
   // Stop listening (for listeners)
   const stopListening = useCallback(() => {
     if (listenerServiceRef.current) {
       listenerServiceRef.current.stopListening();
       listenerServiceRef.current = null;
+    }
+    // Untrack presence
+    if (channelRef.current) {
+      channelRef.current.untrack();
     }
     setIsStreaming(false);
   }, []);
@@ -165,6 +227,7 @@ export function useAudioStream(roomId: string, isHost: boolean) {
     isStreaming,
     error,
     hasPermission,
+    listenersCount,
     startStreaming,
     stopStreaming,
     startListening,

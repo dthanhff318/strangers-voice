@@ -24,10 +24,11 @@ export function LiveRoom() {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { room, loading, error, incrementListeners, decrementListeners } =
-    useLiveRoom(roomId);
+  const { room, loading, error } = useLiveRoom(roomId);
 
   const isHost = room && user && room.host_id === user.id;
+
+  const [listenersCount, setListenersCount] = useState(0);
 
   const {
     isStreaming,
@@ -37,7 +38,12 @@ export function LiveRoom() {
     stopStreaming,
     startListening,
     stopListening,
-  } = useAudioStream(roomId || "", isHost || false);
+  } = useAudioStream(
+    roomId || "",
+    isHost || false,
+    user?.id,
+    setListenersCount
+  );
 
   const [isEnding, setIsEnding] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
@@ -61,12 +67,11 @@ export function LiveRoom() {
 
   useEffect(() => {
     return () => {
-      if (!isHost && hasJoined && roomId) {
+      if (!isHost && hasJoined) {
         stopListening();
-        decrementListeners(roomId);
       }
     };
-  }, [hasJoined, roomId, isHost]);
+  }, [hasJoined, isHost, stopListening]);
 
   // Timer for live duration
   useEffect(() => {
@@ -110,11 +115,8 @@ export function LiveRoom() {
   };
 
   const handleJoinRoom = async () => {
-    if (!roomId) return;
-
     try {
       await startListening();
-      await incrementListeners(roomId);
       setHasJoined(true);
       toast.success("Joined live room");
     } catch (err) {
@@ -143,11 +145,8 @@ export function LiveRoom() {
   };
 
   const handleLeaveRoom = async () => {
-    if (!roomId) return;
-
     try {
       stopListening();
-      await decrementListeners(roomId);
       setHasJoined(false);
       navigate("/live");
       toast.success("Left live room");
@@ -234,7 +233,7 @@ export function LiveRoom() {
               <div className="flex items-center gap-2 bg-[var(--color-bg-secondary)] px-3 py-1.5 rounded-full border border-[var(--color-border)]">
                 <Users className="w-4 h-4 text-[var(--color-text-muted)]" />
                 <span className="text-sm font-semibold text-[var(--color-text-primary)]">
-                  {room.listeners_count}
+                  {listenersCount}
                 </span>
               </div>
             </div>
