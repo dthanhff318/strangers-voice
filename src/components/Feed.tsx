@@ -103,7 +103,12 @@ export function Feed() {
 
       {/* Loading State */}
       {isLoadingRecordings ? (
-        <Loading variant="ring" size={48} label="Loading recordings..." className="py-12" />
+        <Loading
+          variant="ring"
+          size={48}
+          label="Loading recordings..."
+          className="py-12"
+        />
       ) : recordings.length === 0 ? (
         /* Empty State */
         <div className="text-center py-12">

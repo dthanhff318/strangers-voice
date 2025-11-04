@@ -48,7 +48,6 @@ Deno.serve(async (req) => {
       .from("profiles")
       .select("id, full_name, avatar_url, email")
       .neq("id", user.id)
-      .order("RANDOM()")
       .limit(5);
 
     if (error) {
