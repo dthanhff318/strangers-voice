@@ -140,7 +140,7 @@ export function CreateLiveRoomModal({ isOpen, onClose }: CreateLiveRoomModalProp
                 disabled={isCreating}
               >
                 {isCreating ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-[var(--color-btn-primary-text)]/30 border-t-[var(--color-btn-primary-text)] rounded-full animate-spin" />
                 ) : (
                   'Go Live'
                 )}
