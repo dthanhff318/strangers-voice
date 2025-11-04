@@ -5,6 +5,7 @@ import { Search, Users, Loader2, Mic } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { UserProfileModal } from "./UserProfileModal";
 import { Loading } from "./Loading";
+import { PlanBadge } from "./PlanBadge";
 import { debounce } from "lodash";
 
 interface UserProfile {
@@ -12,6 +13,9 @@ interface UserProfile {
   full_name: string | null;
   avatar_url: string | null;
   email: string | null;
+  plan?: {
+    badge_color: string;
+  } | null;
 }
 
 export function Follow() {
@@ -38,7 +42,7 @@ export function Follow() {
       setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, avatar_url, email")
+        .select("id, full_name, avatar_url, email, plan:plans(badge_color)")
         .ilike("full_name", `%${query}%`)
         .limit(20);
 
@@ -208,9 +212,12 @@ export function Follow() {
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-[var(--color-text-primary)] text-lg truncate mb-1">
-                          {userProfile.full_name || "Anonymous User"}
-                        </h3>
+                        <div className="flex items-center gap-1 mb-1">
+                          <h3 className="font-semibold text-[var(--color-text-primary)] text-lg truncate">
+                            {userProfile.full_name || "Anonymous User"}
+                          </h3>
+                          <PlanBadge plan={userProfile.plan} size={16} />
+                        </div>
                         <div className="flex items-center gap-1.5 text-sm text-[var(--color-text-tertiary)]">
                           <Mic className="w-3.5 h-3.5" />
                           <span>
@@ -274,9 +281,12 @@ export function Follow() {
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-[var(--color-text-primary)] text-lg truncate mb-1">
-                    {userProfile.full_name || "Anonymous User"}
-                  </h3>
+                  <div className="flex items-center gap-1 mb-1">
+                    <h3 className="font-semibold text-[var(--color-text-primary)] text-lg truncate">
+                      {userProfile.full_name || "Anonymous User"}
+                    </h3>
+                    <PlanBadge plan={userProfile.plan} size={16} />
+                  </div>
                   <div className="flex items-center gap-1.5 text-sm text-[var(--color-text-tertiary)]">
                     <Mic className="w-3.5 h-3.5" />
                     <span>

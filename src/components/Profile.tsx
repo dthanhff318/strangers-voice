@@ -6,7 +6,7 @@ import { useFollow } from '../hooks/useFollow'
 import { useLoginRequired } from '../App'
 import { getMyRecordings, updateUserInfo } from '../lib/edgeFunctions'
 import { supabase } from '../lib/supabase'
-import { Camera, Edit2, Save, X, Loader2, User as UserIcon, Mic, ArrowLeft, UserPlus, UserCheck, Image } from 'lucide-react'
+import { Camera, Edit2, Save, X, Loader2, User as UserIcon, Mic, ArrowLeft, UserPlus, UserCheck, Image, Crown, BadgeCheck } from 'lucide-react'
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
 import { Button } from './ui/button'
 import { AvatarPicker } from './AvatarPicker'
@@ -28,6 +28,13 @@ interface Recording {
   description: string | null
 }
 
+interface Plan {
+  id: string
+  name: 'silver' | 'gold' | 'diamond'
+  display_name: string
+  badge_color: string
+}
+
 interface UserProfile {
   id: string
   full_name: string | null
@@ -35,6 +42,8 @@ interface UserProfile {
   email: string | null
   created_at: string
   background_id: string | null
+  current_plan_id: string | null
+  plan?: Plan | null
 }
 
 export function Profile() {
@@ -67,19 +76,44 @@ export function Profile() {
       if (!userId) return null
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          plan:plans(id, name, display_name, badge_color)
+        `)
         .eq('id', userId)
         .single()
 
       if (error) throw error
-      return data as UserProfile
+      return {
+        ...data,
+        plan: Array.isArray(data.plan) ? data.plan[0] : data.plan
+      } as UserProfile
     },
     enabled: !!userId && userId !== user?.id,
   })
 
+  // Fetch current user's plan data
+  const {
+    data: currentUserPlan,
+  } = useQuery<Plan | null>({
+    queryKey: ['user-plan', user?.id],
+    queryFn: async () => {
+      if (!user?.id || !currentUserProfile?.current_plan_id) return null
+      const { data, error } = await supabase
+        .from('plans')
+        .select('id, name, display_name, badge_color')
+        .eq('id', currentUserProfile.current_plan_id)
+        .single()
+
+      if (error) return null
+      return data as Plan
+    },
+    enabled: !!user?.id && !!currentUserProfile?.current_plan_id,
+  })
+
   // Use the appropriate profile based on whether it's own or other user's
   const profile: UserProfile | null = isOwnProfile
-    ? (currentUserProfile as UserProfile | null)
+    ? { ...currentUserProfile as UserProfile, plan: currentUserPlan } as UserProfile | null
     : (otherUserProfile ?? null)
 
   // Use follow hook to get follow status and counts
@@ -356,19 +390,32 @@ export function Profile() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 group/name">
-                    <p className="text-lg font-bold text-[var(--color-text-primary)] truncate">
-                      {profile?.full_name || 'Anonymous User'}
-                    </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="flex items-center gap-2 group/name flex-1 min-w-0">
+                      <p className="text-lg font-bold text-[var(--color-text-primary)] truncate">
+                        {profile?.full_name || 'Anonymous User'}
+                      </p>
+                      {isOwnProfile && (
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => setIsEditing(true)}
+                          className="p-1 rounded-md hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all opacity-0 group-hover/name:opacity-100"
+                          title="Edit name"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                    {/* Upgrade Button - Only for own profile */}
                     {isOwnProfile && (
                       <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => setIsEditing(true)}
-                        className="p-1 rounded-md hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all opacity-0 group-hover/name:opacity-100"
-                        title="Edit name"
+                        onClick={() => navigate('/upgrade')}
+                        size="sm"
+                        className="bg-gradient-to-r from-[#C0C0C0] via-[#FFD700] to-[#B9F2FF] hover:opacity-90 text-gray-900 font-semibold flex-shrink-0 w-full sm:w-auto"
                       >
-                        <Edit2 className="w-3.5 h-3.5" />
+                        <Crown className="w-4 h-4" />
+                        {profile?.plan ? 'Change Plan' : 'Upgrade to VIP'}
                       </Button>
                     )}
                   </div>
@@ -385,8 +432,27 @@ export function Profile() {
                 </div>
               )}
 
+              {/* VIP Badge */}
+              {profile?.plan && (
+                <div className="mb-3">
+                  <div className="inline-flex items-center gap-1.5">
+                    <BadgeCheck
+                      className="w-4 h-4"
+                      style={{ color: '#ffffff' }}
+                      fill={profile.plan.badge_color}
+                    />
+                    <span
+                      className="text-sm font-semibold"
+                      style={{ color: profile.plan.badge_color }}
+                    >
+                      {profile.plan.display_name}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {/* Voice Creator label for other user's profile */}
-              {!isOwnProfile && (
+              {!isOwnProfile && !profile?.plan && (
                 <p className="text-sm text-[var(--color-text-tertiary)] mb-3">Voice Creator</p>
               )}
 

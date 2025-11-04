@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
     // Using service role key to bypass RLS
     const { data: recommendedUsers, error } = await supabaseClient
       .from("profiles")
-      .select("id, full_name, avatar_url, email")
+      .select("id, full_name, avatar_url, email, plan:plans(badge_color)")
       .neq("id", user.id)
       .limit(5);
 

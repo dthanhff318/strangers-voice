@@ -57,7 +57,8 @@ serve(async (req) => {
         profiles!follows_follower_id_fkey (
           id,
           full_name,
-          avatar_url
+          avatar_url,
+          plan:plans(badge_color)
         )
       `)
       .eq("following_id", userId);

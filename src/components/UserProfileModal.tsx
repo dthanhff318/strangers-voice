@@ -5,11 +5,15 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { useFollow } from "../hooks/useFollow";
 import { Button } from "@/components/ui/button";
+import { PlanBadge } from "./PlanBadge";
 
 interface UserProfile {
   id: string;
   full_name: string | null;
   avatar_url: string | null;
+  plan?: {
+    badge_color: string;
+  } | null;
 }
 
 interface UserProfileModalProps {
@@ -120,9 +124,12 @@ export function UserProfileModal({
 
             {/* Name */}
             <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-[var(--color-text-primary)] mb-1">
-                {userProfile.full_name || "Anonymous User"}
-              </h3>
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <h3 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                  {userProfile.full_name || "Anonymous User"}
+                </h3>
+                <PlanBadge plan={userProfile.plan} size={20} />
+              </div>
               <p className="text-sm text-[var(--color-text-tertiary)] mb-4">
                 Voice Creator
               </p>

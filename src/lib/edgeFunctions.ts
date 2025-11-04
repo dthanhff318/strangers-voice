@@ -118,6 +118,9 @@ export async function getFollowers(userId: string) {
       id: string;
       full_name: string | null;
       avatar_url: string | null;
+      plan?: {
+        badge_color: string;
+      } | null;
     }[];
   }>("get-followers", { userId });
 }
@@ -133,6 +136,9 @@ export async function getFollowing(userId: string) {
       id: string;
       full_name: string | null;
       avatar_url: string | null;
+      plan?: {
+        badge_color: string;
+      } | null;
     }[];
   }>("get-following", { userId });
 }
@@ -148,6 +154,9 @@ export async function getRecommendedUsers() {
       full_name: string | null;
       avatar_url: string | null;
       email: string | null;
+      plan?: {
+        badge_color: string;
+      } | null;
     }[];
   }>("get-recommended-users");
 }

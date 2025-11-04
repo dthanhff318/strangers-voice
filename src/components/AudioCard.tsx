@@ -3,6 +3,7 @@ import { useAudioPlayer } from "../contexts/AudioPlayerContext";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { UserProfileModal } from "./UserProfileModal";
 import { getBackgroundById } from "../constants/backgrounds";
+import { PlanBadge } from "./PlanBadge";
 
 interface Recording {
   id: string;
@@ -19,6 +20,9 @@ interface Recording {
     full_name: string | null;
     avatar_url: string | null;
     background_id: string | null;
+    plan?: {
+      badge_color: string;
+    } | null;
   } | null;
 }
 
@@ -82,9 +86,12 @@ export function AudioCard({ recording }: AudioCardProps) {
             <h3 className={`font-semibold text-lg mb-1 truncate ${hasBackground ? 'text-white' : 'text-[var(--color-text-primary)]'}`}>
               {recording.title || "Untitled"}
             </h3>
-            <p className={`text-sm truncate ${hasBackground ? 'text-white/80' : 'text-[var(--color-text-tertiary)]'}`}>
-              {recording.profiles?.full_name || "Unknown"}
-            </p>
+            <div className="flex items-center gap-1">
+              <p className={`text-sm truncate ${hasBackground ? 'text-white/80' : 'text-[var(--color-text-tertiary)]'}`}>
+                {recording.profiles?.full_name || "Unknown"}
+              </p>
+              <PlanBadge plan={recording.profiles?.plan} size={16} />
+            </div>
           </div>
 
           {/* Duration */}
@@ -103,6 +110,7 @@ export function AudioCard({ recording }: AudioCardProps) {
             id: recording.profiles.id,
             full_name: recording.profiles.full_name,
             avatar_url: recording.profiles.avatar_url,
+            plan: recording.profiles.plan,
           }}
         />
       )}

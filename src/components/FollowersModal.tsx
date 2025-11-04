@@ -6,6 +6,7 @@ import { useFollow } from '../hooks/useFollow'
 import { getFollowers, getFollowing } from '../lib/edgeFunctions'
 import { Button } from './ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
+import { PlanBadge } from './PlanBadge'
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,9 @@ interface UserProfile {
   id: string
   full_name: string | null
   avatar_url: string | null
+  plan?: {
+    badge_color: string
+  } | null
 }
 
 interface FollowersModalProps {
@@ -155,9 +159,12 @@ function UserItem({ userProfile, currentUserId, onNavigate }: UserItemProps) {
         className="flex-1 min-w-0 cursor-pointer"
         onClick={() => onNavigate(userProfile.id)}
       >
-        <h3 className="font-semibold text-[var(--color-text-primary)] truncate">
-          {userProfile.full_name || 'Anonymous User'}
-        </h3>
+        <div className="flex items-center gap-1">
+          <h3 className="font-semibold text-[var(--color-text-primary)] truncate">
+            {userProfile.full_name || 'Anonymous User'}
+          </h3>
+          <PlanBadge plan={userProfile.plan} size={16} />
+        </div>
         <p className="text-sm text-[var(--color-text-tertiary)]">
           Voice Creator
         </p>
