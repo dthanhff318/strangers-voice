@@ -3,9 +3,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { getTrendingRecordsDashboard } from "../lib/edgeFunctions";
 import { AudioCard } from "./AudioCard";
+import { Loading } from "./Loading";
 import { Sparkles } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useLoginRequired } from "../App";
+import { getTimeBasedGreeting } from "../utils/greetings";
 
 interface Recording {
   id: string;
@@ -25,21 +27,6 @@ interface Recording {
   } | null;
 }
 
-// Helper function to get time-based greeting
-function getTimeBasedGreeting(): string {
-  const hour = new Date().getHours();
-
-  if (hour >= 5 && hour < 12) {
-    return "Good morning";
-  } else if (hour >= 12 && hour < 17) {
-    return "Good afternoon";
-  } else if (hour >= 17 && hour < 21) {
-    return "Good evening";
-  } else {
-    return "Good night";
-  }
-}
-
 export function Feed() {
   const queryClient = useQueryClient();
   const { profile } = useAuth();
@@ -48,6 +35,7 @@ export function Feed() {
   // Use React Query for data fetching with caching
   const {
     data: recordings = [],
+    isLoading: isLoadingRecordings,
     error,
   } = useQuery<Recording[]>({
     queryKey: ["trending-recordings"],
@@ -106,14 +94,18 @@ export function Feed() {
           <div className="flex items-center gap-3">
             <Sparkles className="w-6 h-6 text-[var(--color-accent-primary)]" />
             <h1 className="text-2xl font-semibold text-[var(--color-text-primary)]">
-              {greeting}{displayName}
+              {greeting}
+              {displayName}
             </h1>
           </div>
         </div>
       </div>
 
-      {/* Recordings List */}
-      {recordings.length === 0 ? (
+      {/* Loading State */}
+      {isLoadingRecordings ? (
+        <Loading variant="ring" size={48} label="Loading recordings..." className="py-12" />
+      ) : recordings.length === 0 ? (
+        /* Empty State */
         <div className="text-center py-12">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-[var(--color-btn-primary)] rounded-xl flex items-center justify-center opacity-50">
@@ -132,6 +124,7 @@ export function Feed() {
           </p>
         </div>
       ) : (
+        /* Recordings List */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {recordings.map((recording) => (
             <AudioCard
