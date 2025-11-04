@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLiveRooms } from '../hooks/useLiveRoom'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
@@ -29,20 +29,45 @@ export function LiveFeed() {
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
   const [checkingRoom, setCheckingRoom] = useState(false)
 
+  // Check for active room on mount and when user changes
+  useEffect(() => {
+    const checkActiveRoom = async () => {
+      if (!user) {
+        setActiveRoomId(null)
+        return
+      }
+
+      const { data: activeRoom } = await getUserActiveRoom()
+      if (activeRoom) {
+        setActiveRoomId(activeRoom.id)
+      } else {
+        setActiveRoomId(null)
+      }
+    }
+
+    checkActiveRoom()
+  }, [user])
+
   const handleCreateLive = async () => {
     if (!user) {
       setShowLoginModal(true)
       return
     }
 
-    // Check if user already has an active room
+    // If already has active room, navigate to it
+    if (activeRoomId) {
+      navigate(`/live/${activeRoomId}`)
+      return
+    }
+
+    // Check if user already has an active room (double check)
     setCheckingRoom(true)
     const { data: activeRoom } = await getUserActiveRoom()
     setCheckingRoom(false)
 
     if (activeRoom) {
       setActiveRoomId(activeRoom.id)
-      setShowActiveRoomAlert(true)
+      navigate(`/live/${activeRoom.id}`)
       return
     }
 
@@ -96,11 +121,13 @@ export function LiveFeed() {
                 className="bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] gap-2 shadow-lg shadow-[var(--color-accent)]/20 transition-all hover:scale-105 disabled:opacity-50"
               >
                 {checkingRoom ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-[var(--color-btn-primary-text)]/30 border-t-[var(--color-btn-primary-text)] rounded-full animate-spin" />
+                ) : activeRoomId ? (
+                  <Radio className="w-5 h-5" />
                 ) : (
                   <Plus className="w-5 h-5" />
                 )}
-                Go Live
+                {activeRoomId ? 'Return to Your Live' : 'Go Live'}
               </Button>
             )}
           </div>
