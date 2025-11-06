@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../contexts/AuthContext'
 import { useFollow } from '../hooks/useFollow'
@@ -49,6 +49,7 @@ interface UserProfile {
 export function Profile() {
   const { userId } = useParams<{ userId: string }>()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { user, profile: currentUserProfile, refreshProfile } = useAuth()
   const { onLoginRequired } = useLoginRequired()
   const queryClient = useQueryClient()
@@ -134,6 +135,24 @@ export function Profile() {
       setAvatarUrl(currentUserProfile.avatar_url || `https://api.dicebear.com/9.x/micah/svg?seed=${user?.id || 'default'}`)
     }
   }, [currentUserProfile, user, isOwnProfile])
+
+  // Check for successful payment from Stripe
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id')
+    if (sessionId && isOwnProfile) {
+      // Show success message
+      toast.success('Payment successful! 🎉', {
+        description: 'Your VIP plan has been activated',
+      })
+
+      // Remove session_id from URL
+      setSearchParams({})
+
+      // Refresh profile to show new plan
+      refreshProfile()
+      queryClient.invalidateQueries({ queryKey: ['user-plan', user?.id] })
+    }
+  }, [searchParams, setSearchParams, isOwnProfile, refreshProfile, queryClient, user?.id])
 
   // Use React Query for fetching recordings with caching
   const {

@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 import { Loader2, AudioLines, Users, Flag } from "lucide-react";
 import { toast } from "sonner";
 import { WeeklyVideosChart } from "./WeeklyVideosChart";
+import { AdminPlans } from "./AdminPlans";
 
 interface Stats {
   totalRecordings: number;
@@ -162,6 +163,7 @@ export function Admin() {
           <TabsList className="bg-[var(--color-bg-card)] border border-[var(--color-border)]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="plans">Plans</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -210,6 +212,11 @@ export function Admin() {
 
             {/* Weekly Videos Chart */}
             <WeeklyVideosChart />
+          </TabsContent>
+
+          {/* Plans Tab */}
+          <TabsContent value="plans">
+            <AdminPlans />
           </TabsContent>
 
           {/* Reports Tab */}

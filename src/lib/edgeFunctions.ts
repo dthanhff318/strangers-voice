@@ -263,3 +263,42 @@ export async function getUserActiveRoom() {
     return { data: null, error: error as Error };
   }
 }
+
+/**
+ * Update a plan (admin only)
+ * @param planId - The ID of the plan to update
+ * @param displayName - Plan's display name (optional)
+ * @param description - Plan's description (optional)
+ * @param price - Plan's price (optional)
+ * @param features - Plan's features array (optional)
+ * @param badgeColor - Plan's badge color (optional)
+ */
+export async function updatePlan(
+  planId: string,
+  displayName?: string,
+  description?: string,
+  price?: number,
+  features?: string[],
+  badgeColor?: string
+) {
+  const body: any = { planId };
+  if (displayName !== undefined) body.displayName = displayName;
+  if (description !== undefined) body.description = description;
+  if (price !== undefined) body.price = price;
+  if (features !== undefined) body.features = features;
+  if (badgeColor !== undefined) body.badgeColor = badgeColor;
+
+  return callEdgeFunction("update-plan", body);
+}
+
+/**
+ * Create Stripe checkout session for plan subscription
+ * @param planId - The ID of the plan to subscribe to
+ * @returns Stripe checkout session URL
+ */
+export async function subscriptionPlan(planId: string) {
+  return callEdgeFunction<{
+    sessionId: string;
+    url: string;
+  }>("subscription-plan", { planId });
+}

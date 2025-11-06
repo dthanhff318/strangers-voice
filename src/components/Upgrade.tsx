@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../contexts/AuthContext";
 import { useLoginRequired } from "../App";
 import { supabase } from "../lib/supabase";
+import { subscriptionPlan } from "../lib/edgeFunctions";
 import type { Plan } from "../types/membership";
 import { ArrowLeft, Check, Crown, Loader2, Sparkles, Star } from "lucide-react";
 import { Button } from "./ui/button";
@@ -46,7 +47,7 @@ export function Upgrade() {
     enabled: !!user,
   });
 
-  const handleUpgrade = async (planId: string, planName: string) => {
+  const handleUpgrade = async (planId: string, planName: string, planPrice: number) => {
     if (!user) {
       onLoginRequired();
       return;
@@ -55,30 +56,41 @@ export function Upgrade() {
     try {
       setUpgrading(planId);
 
-      // Update user's plan
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          current_plan_id: planId,
-          plan_upgraded_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
+      // If plan is free, directly update the profile
+      if (planPrice === 0) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            current_plan_id: planId,
+            plan_upgraded_at: new Date().toISOString(),
+          })
+          .eq("id", user.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Refresh profile
-      await refreshProfile();
+        // Refresh profile
+        await refreshProfile();
 
-      // Invalidate all queries to refresh data everywhere
-      await queryClient.invalidateQueries();
+        // Invalidate all queries to refresh data everywhere
+        await queryClient.invalidateQueries();
 
-      toast.success(`Successfully upgraded to ${planName}!`, {
-        description: "Enjoy your new VIP benefits",
-      });
+        toast.success(`Successfully upgraded to ${planName}!`, {
+          description: "Enjoy your new VIP benefits",
+        });
+      } else {
+        // For paid plans, create Stripe checkout session
+        const { data, error } = await subscriptionPlan(planId);
+
+        if (error || !data?.url) {
+          throw new Error("Failed to create checkout session");
+        }
+
+        // Redirect to Stripe checkout
+        window.location.href = data.url;
+      }
     } catch (err) {
       console.error("Error upgrading plan:", err);
-      toast.error("Failed to upgrade. Please try again.");
-    } finally {
+      toast.error("Failed to start checkout. Please try again.");
       setUpgrading(null);
     }
   };
@@ -180,10 +192,10 @@ export function Upgrade() {
                 {/* Price */}
                 <div className="text-center mb-4">
                   <div className="text-2xl font-bold text-[var(--color-text-primary)]">
-                    Free
+                    ${plan.price}
                   </div>
                   <div className="text-xs text-[var(--color-text-tertiary)]">
-                    No payment required
+                    per month
                   </div>
                 </div>
 
@@ -201,7 +213,7 @@ export function Upgrade() {
 
                 {/* Select Button */}
                 <Button
-                  onClick={() => handleUpgrade(plan.id, plan.display_name)}
+                  onClick={() => handleUpgrade(plan.id, plan.display_name, plan.price)}
                   disabled={isCurrentPlan || isUpgrading}
                   className={`
                     w-full py-4 rounded-lg font-semibold text-sm transition-all
@@ -239,7 +251,7 @@ export function Upgrade() {
         {/* Additional Info */}
         <div className="mt-12 text-center">
           <p className="text-sm text-[var(--color-text-tertiary)]">
-            All plans are currently free. You can switch between plans anytime.
+            Choose the plan that fits your needs. You can upgrade or downgrade anytime.
           </p>
         </div>
       </div>
