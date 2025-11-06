@@ -6,16 +6,9 @@ import { useLoginRequired } from "../App";
 import { supabase } from "../lib/supabase";
 import { subscriptionPlan } from "../lib/edgeFunctions";
 import type { Plan } from "../types/membership";
-import { ArrowLeft, Check, Crown, Loader2, Sparkles, Star } from "lucide-react";
+import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
-
-// Plan card icons mapping
-const planIcons: Record<string, typeof Crown> = {
-  silver: Star,
-  gold: Crown,
-  diamond: Sparkles,
-};
 
 export function Upgrade() {
   const navigate = useNavigate();
@@ -127,7 +120,7 @@ export function Upgrade() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-[var(--color-text-primary)] mb-3">
-            Upgrade to VIP
+            Upgrade VIP
           </h1>
           <p className="text-lg text-[var(--color-text-secondary)]">
             Choose the perfect plan for your needs
@@ -137,7 +130,6 @@ export function Upgrade() {
         {/* Plans Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
           {plans.map((plan) => {
-            const Icon = planIcons[plan.name] || Star;
             const isCurrentPlan = profile?.current_plan_id === plan.id;
             const isUpgrading = upgrading === plan.id;
 
@@ -161,22 +153,9 @@ export function Upgrade() {
                   </div>
                 )}
 
-                {/* Plan Icon */}
-                <div className="flex justify-center mb-3">
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: `${plan.badge_color}20` }}
-                  >
-                    <Icon
-                      className="w-6 h-6"
-                      style={{ color: plan.badge_color }}
-                    />
-                  </div>
-                </div>
-
                 {/* Plan Name */}
                 <h3
-                  className="text-xl font-bold text-center mb-2"
+                  className="text-xl font-bold text-center mb-2 mt-4"
                   style={{ color: plan.badge_color }}
                 >
                   {plan.display_name}
