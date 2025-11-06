@@ -376,41 +376,43 @@ export function Profile() {
                   </label>
                 )}
                 {isOwnProfile && isEditing ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Enter your name"
-                      className="flex-1 px-3 py-1.5 bg-[var(--color-bg-input)] border border-[var(--color-border-light)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-border-focus)] transition-colors"
+                      className="flex-1 w-full px-3 py-1.5 bg-[var(--color-bg-input)] border border-[var(--color-border-light)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-border-focus)] transition-colors"
                     />
-                    <Button
-                      size="icon-sm"
-                      onClick={handleSave}
-                      disabled={saving}
-                      className="p-1.5 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] rounded-lg transition-all disabled:opacity-50"
-                      title="Save"
-                    >
-                      {saving ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Save className="w-4 h-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon-sm"
-                      onClick={handleCancel}
-                      disabled={saving}
-                      className="p-1.5 bg-[var(--color-bg-elevated)] hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-secondary)] rounded-lg transition-all disabled:opacity-50"
-                      title="Cancel"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="icon-sm"
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="flex-1 sm:flex-none p-1.5 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] rounded-lg transition-all disabled:opacity-50"
+                        title="Save"
+                      >
+                        {saving ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Save className="w-4 h-4" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon-sm"
+                        onClick={handleCancel}
+                        disabled={saving}
+                        className="flex-1 sm:flex-none p-1.5 bg-[var(--color-bg-elevated)] hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-secondary)] rounded-lg transition-all disabled:opacity-50"
+                        title="Cancel"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <div className="flex items-center gap-2 group/name flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
                       <p className="text-lg font-bold text-[var(--color-text-primary)] truncate">
                         {profile?.full_name || 'Anonymous User'}
                       </p>
@@ -419,7 +421,7 @@ export function Profile() {
                           variant="ghost"
                           size="icon-sm"
                           onClick={() => setIsEditing(true)}
-                          className="p-1 rounded-md hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all opacity-0 group-hover/name:opacity-100"
+                          className="p-1 rounded-md hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all sm:opacity-0 sm:group-hover/name:opacity-100"
                           title="Edit name"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
