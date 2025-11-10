@@ -1,4 +1,5 @@
 import { useEffect, useState, memo } from "react";
+import { useTranslation } from "react-i18next";
 
 interface LoadingScreenProps {
   onComplete: () => void;
@@ -6,6 +7,7 @@ interface LoadingScreenProps {
 }
 
 export const LoadingScreen = memo(function LoadingScreen({ onComplete, progress }: LoadingScreenProps) {
+  const { t } = useTranslation(['common']);
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
@@ -47,12 +49,12 @@ export const LoadingScreen = memo(function LoadingScreen({ onComplete, progress 
 
       {/* Brand name */}
       <h1 className="text-4xl font-bold text-[var(--color-text-primary)] mb-2">
-        YMelody
+        {t('common:app.name')}
       </h1>
 
       {/* Tagline */}
       <p className="text-[var(--color-text-tertiary)] mb-12">
-        Share your voice with the world
+        {t('common:app.tagline')}
       </p>
 
       {/* Progress bar */}
@@ -67,7 +69,7 @@ export const LoadingScreen = memo(function LoadingScreen({ onComplete, progress 
         {/* Loading text */}
         <div className="mt-3 text-center">
           <span className="text-xs text-[var(--color-text-tertiary)] font-medium">
-            {progress < 100 ? "Loading..." : "Ready!"}
+            {progress < 100 ? t('common:app.loading') : t('common:app.ready')}
           </span>
         </div>
       </div>

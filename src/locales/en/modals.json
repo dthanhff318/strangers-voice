@@ -1,0 +1,46 @@
+{
+  "login": {
+    "title": "Welcome to YMelody",
+    "subtitle": "Sign in to share your voice",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "signInSuccess": "Signed in successfully",
+    "signInFailed": "Failed to sign in",
+    "signUpSuccess": "Account created successfully",
+    "signUpFailed": "Failed to create account"
+  },
+  "onboarding": {
+    "welcome": "Welcome to YMelody!",
+    "step1": "Record your voice",
+    "step1Description": "Share your thoughts, stories, and creativity",
+    "step2": "Discover voices",
+    "step2Description": "Listen to amazing recordings from around the world",
+    "step3": "Connect with people",
+    "step3Description": "Follow your favorite creators and build your community",
+    "next": "Next",
+    "skip": "Skip",
+    "getStarted": "Get Started",
+    "done": "Done"
+  },
+  "report": {
+    "title": "Report Content",
+    "reason": "Reason",
+    "description": "Description",
+    "spam": "Spam",
+    "inappropriate": "Inappropriate content",
+    "harassment": "Harassment",
+    "other": "Other",
+    "submit": "Submit Report",
+    "cancel": "Cancel",
+    "success": "Report submitted successfully",
+    "failed": "Failed to submit report",
+    "placeholder": "Please provide more details..."
+  }
+}

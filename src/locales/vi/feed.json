@@ -1,0 +1,15 @@
+{
+  "greetings": {
+    "morning": "Chào buổi sáng",
+    "afternoon": "Chào buổi chiều",
+    "evening": "Chào buổi tối",
+    "night": "Chúc ngủ ngon"
+  },
+  "trendingRecordings": "Bản ghi âm thịnh hành",
+  "discoverNewVoices": "Khám phá những giọng nói tuyệt vời từ khắp nơi trên thế giới",
+  "loading": "Đang tải bản ghi âm...",
+  "error": "Không thể tải bản ghi âm",
+  "noRecordings": "Chưa có bản ghi âm nào",
+  "beTheFirst": "Hãy là người đầu tiên ghi âm!",
+  "refreshFailed": "Không thể làm mới"
+}

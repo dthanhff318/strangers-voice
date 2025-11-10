@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useLiveRoom } from "../hooks/useLiveRoom";
 import { useAudioStream } from "../hooks/useAudioStream";
 import { useAuth } from "../contexts/AuthContext";
@@ -22,6 +23,7 @@ import { LiveChat } from "./LiveChat";
 import { Loading } from "./Loading";
 
 export function LiveRoom() {
+  const { t } = useTranslation(['live', 'common']);
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -30,6 +32,17 @@ export function LiveRoom() {
   const isHost = room && user && room.host_id === user.id;
 
   const [listenersCount, setListenersCount] = useState(0);
+
+  const handleHostDisconnect = useCallback(() => {
+    if (!roomId || isHost) return; // Only listeners should handle this
+
+    console.log("[LiveRoom] 🚨 Host disconnected! Leaving room...");
+
+    // Listeners just leave the room, don't call endLiveRoom API
+    // The room will become inactive naturally when there's no host
+    toast.info(t('live:hostLeft'));
+    navigate("/live");
+  }, [roomId, isHost, navigate]);
 
   const {
     isStreaming,
@@ -43,7 +56,8 @@ export function LiveRoom() {
     roomId || "",
     isHost || false,
     user?.id,
-    setListenersCount
+    setListenersCount,
+    handleHostDisconnect
   );
 
   const [isEnding, setIsEnding] = useState(false);
@@ -108,10 +122,10 @@ export function LiveRoom() {
   const handleStartStreaming = async () => {
     try {
       await startStreaming();
-      toast.success("Live streaming started!");
+      toast.success(t('live:streamingStarted'));
     } catch (error) {
       console.error("Error starting streaming:", error);
-      toast.error("Failed to start streaming");
+      toast.error(t('live:streamingFailed'));
     }
   };
 
@@ -119,10 +133,10 @@ export function LiveRoom() {
     try {
       await startListening();
       setHasJoined(true);
-      toast.success("Joined live room");
+      toast.success(t('live:joinedRoom'));
     } catch (err) {
       console.error("Error joining room:", err);
-      toast.error("Failed to join room");
+      toast.error(t('live:failedToJoin'));
     }
   };
 
@@ -136,11 +150,11 @@ export function LiveRoom() {
       const { error } = await endLiveRoom(roomId);
       if (error) throw error;
 
-      toast.success("Live session ended");
+      toast.success(t('live:sessionEndedSuccess'));
       navigate("/live");
     } catch (err) {
       console.error("Error ending live:", err);
-      toast.error("Failed to end live session");
+      toast.error(t('live:failedToEnd'));
       setIsEnding(false);
     }
   };
@@ -150,10 +164,10 @@ export function LiveRoom() {
       stopListening();
       setHasJoined(false);
       navigate("/live");
-      toast.success("Left live room");
+      toast.success(t('live:leftRoom'));
     } catch (err) {
       console.error("Error leaving room:", err);
-      toast.error("Failed to leave room");
+      toast.error(t('live:failedToLeave'));
     }
   };
 
@@ -162,19 +176,19 @@ export function LiveRoom() {
       // Unmute - restart streaming
       handleStartStreaming();
       setIsMicMuted(false);
-      toast.success("Microphone unmuted");
+      toast.success(t('live:micUnmuted'));
     } else {
       // Mute - stop streaming
       stopStreaming();
       setIsMicMuted(true);
-      toast.success("Microphone muted");
+      toast.success(t('live:micMuted'));
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-[var(--color-bg-primary)]">
-        <Loading variant="ring" size={48} label="Loading live room..." />
+        <Loading variant="ring" size={48} label={t('live:loadingRoom')} />
       </div>
     );
   }
@@ -185,11 +199,11 @@ export function LiveRoom() {
         <div className="text-center space-y-4">
           <p className="text-[var(--color-text-primary)] text-lg">
             {!room?.is_active
-              ? "This live session has ended"
-              : "Room not found"}
+              ? t('live:sessionEnded')
+              : t('live:roomNotFound')}
           </p>
           <Button onClick={() => navigate("/live")} variant="outline">
-            Back to Live Feed
+            {t('live:backToFeed')}
           </Button>
         </div>
       </div>
@@ -222,7 +236,7 @@ export function LiveRoom() {
                     <div className="absolute inset-0 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping" />
                   </div>
                   <span className="text-sm font-bold text-white uppercase tracking-wider">
-                    Live
+                    {t('live:live')}
                   </span>
                 </div>
               </div>
@@ -251,7 +265,7 @@ export function LiveRoom() {
               </Avatar>
               <div className="flex-1">
                 <p className="text-sm text-[var(--color-text-muted)] mb-1">
-                  {isHost ? "You're Live" : "Hosted by"}
+                  {isHost ? t('live:youreLive') : t('live:hostedBy')}
                 </p>
                 <p className="font-semibold text-[var(--color-text-primary)]">
                   {isHost ? room.title : room.host?.full_name || "Anonymous"}
@@ -315,7 +329,7 @@ export function LiveRoom() {
                     size="sm"
                     className="bg-green-500 hover:bg-green-600 text-white"
                   >
-                    Start Listening
+                    {t('live:startListening')}
                   </Button>
                 </div>
                 {streamError && (
@@ -335,7 +349,7 @@ export function LiveRoom() {
                   disabled={isEnding}
                   className="w-full bg-red-500 hover:bg-red-600 text-white"
                 >
-                  {isEnding ? "Ending..." : "End Live Session"}
+                  {isEnding ? t('live:ending') : t('live:endLiveSession')}
                 </Button>
               </div>
             )}
@@ -350,19 +364,18 @@ export function LiveRoom() {
           <AlertDialog open={showEndConfirm} onOpenChange={setShowEndConfirm}>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>End Live Session?</AlertDialogTitle>
+                <AlertDialogTitle>{t('live:endSessionTitle')}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to end this live session? All listeners
-                  will be disconnected and this action cannot be undone.
+                  {t('live:endSessionDescription')}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleEndLive}
                   className="bg-red-500 hover:bg-red-600 !text-[var(--color-btn-primary-text)]"
                 >
-                  End Session
+                  {t('live:endSession')}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

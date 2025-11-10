@@ -2,10 +2,12 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './theme.css'
+import './i18n/config' // Initialize i18n
 import App from './App.tsx'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { AudioPlayerProvider } from './contexts/AudioPlayerContext'
+import { LanguageProvider } from './contexts/LanguageContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Configure QueryClient with optimized caching settings
@@ -24,13 +26,15 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <AudioPlayerProvider>
-            <App />
-          </AudioPlayerProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <LanguageProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <AudioPlayerProvider>
+              <App />
+            </AudioPlayerProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   </StrictMode>,
 )

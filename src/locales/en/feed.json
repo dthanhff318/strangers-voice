@@ -1,0 +1,15 @@
+{
+  "greetings": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "night": "Good night"
+  },
+  "trendingRecordings": "Trending Recordings",
+  "discoverNewVoices": "Discover amazing voices from around the world",
+  "loading": "Loading recordings...",
+  "error": "Failed to load recordings",
+  "noRecordings": "No recordings yet",
+  "beTheFirst": "Be the first to record something!",
+  "refreshFailed": "Failed to refresh"
+}

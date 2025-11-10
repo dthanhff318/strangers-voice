@@ -1,0 +1,46 @@
+{
+  "login": {
+    "title": "Chào mừng đến với YMelody",
+    "subtitle": "Đăng nhập để chia sẻ giọng nói của bạn",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "forgotPassword": "Quên mật khẩu?",
+    "noAccount": "Chưa có tài khoản?",
+    "haveAccount": "Đã có tài khoản?",
+    "emailPlaceholder": "Nhập email của bạn",
+    "passwordPlaceholder": "Nhập mật khẩu",
+    "signInSuccess": "Đăng nhập thành công",
+    "signInFailed": "Đăng nhập thất bại",
+    "signUpSuccess": "Tạo tài khoản thành công",
+    "signUpFailed": "Không thể tạo tài khoản"
+  },
+  "onboarding": {
+    "welcome": "Chào mừng đến với YMelody!",
+    "step1": "Ghi âm giọng nói của bạn",
+    "step1Description": "Chia sẻ suy nghĩ, câu chuyện và sự sáng tạo của bạn",
+    "step2": "Khám phá giọng nói",
+    "step2Description": "Lắng nghe những bản ghi âm tuyệt vời từ khắp nơi trên thế giới",
+    "step3": "Kết nối với mọi người",
+    "step3Description": "Theo dõi những người sáng tạo yêu thích và xây dựng cộng đồng của bạn",
+    "next": "Tiếp theo",
+    "skip": "Bỏ qua",
+    "getStarted": "Bắt đầu",
+    "done": "Hoàn tất"
+  },
+  "report": {
+    "title": "Báo cáo nội dung",
+    "reason": "Lý do",
+    "description": "Mô tả",
+    "spam": "Thư rác",
+    "inappropriate": "Nội dung không phù hợp",
+    "harassment": "Quấy rối",
+    "other": "Khác",
+    "submit": "Gửi báo cáo",
+    "cancel": "Hủy",
+    "success": "Gửi báo cáo thành công",
+    "failed": "Không thể gửi báo cáo",
+    "placeholder": "Vui lòng cung cấp thêm chi tiết..."
+  }
+}

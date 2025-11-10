@@ -1,0 +1,43 @@
+{
+  "title": "Cài đặt",
+  "appearance": {
+    "title": "Giao diện",
+    "theme": "Chủ đề",
+    "themeDescription": "Hiện đang sử dụng chủ đề {{theme}}",
+    "dark": "tối",
+    "light": "sáng"
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "push": "Thông báo đẩy",
+    "pushDescription": "Nhận thông báo về hoạt động mới",
+    "email": "Thông báo Email",
+    "emailDescription": "Nhận cập nhật qua email"
+  },
+  "privacy": {
+    "title": "Quyền riêng tư & Bảo mật",
+    "privateProfile": "Hồ sơ riêng tư",
+    "privateProfileDescription": "Chỉ người theo dõi mới có thể xem bản ghi âm của bạn"
+  },
+  "language": {
+    "title": "Ngôn ngữ & Khu vực",
+    "language": "Ngôn ngữ",
+    "languageDescription": "Chọn ngôn ngữ ưa thích của bạn",
+    "selectLanguage": "Chọn ngôn ngữ",
+    "languages": {
+      "en": "English",
+      "vi": "Tiếng Việt"
+    }
+  },
+  "contact": {
+    "title": "Liên hệ",
+    "supportEmail": "Email hỗ trợ",
+    "supportEmailDescription": "Liên hệ với chúng tôi"
+  },
+  "about": {
+    "title": "Giới thiệu",
+    "version": "Phiên bản",
+    "termsOfService": "Điều khoản dịch vụ",
+    "privacyPolicy": "Chính sách bảo mật"
+  }
+}

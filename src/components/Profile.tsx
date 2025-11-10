@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import { useFollow } from '../hooks/useFollow'
 import { useLoginRequired } from '../App'
@@ -50,6 +51,7 @@ export function Profile() {
   const { userId } = useParams<{ userId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { t } = useTranslation(['profile', 'common'])
   const { user, profile: currentUserProfile, refreshProfile } = useAuth()
   const { onLoginRequired } = useLoginRequired()
   const queryClient = useQueryClient()
@@ -141,8 +143,8 @@ export function Profile() {
     const sessionId = searchParams.get('session_id')
     if (sessionId && isOwnProfile) {
       // Show success message
-      toast.success('Payment successful! 🎉', {
-        description: 'Your VIP plan has been activated',
+      toast.success(t('profile:paymentSuccess'), {
+        description: t('profile:vipActivated'),
       })
 
       // Remove session_id from URL
@@ -200,16 +202,16 @@ export function Profile() {
           <UserIcon className="w-12 h-12 text-[var(--color-text-tertiary)]" />
         </div>
         <h2 className="text-3xl font-bold text-[var(--color-text-primary)] mb-3 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
-          Sign in to view your profile
+          {t('profile:signInToView')}
         </h2>
         <p className="text-[var(--color-text-tertiary)] max-w-sm mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
-          Create your profile, customize your avatar, and connect with the community
+          {t('profile:createProfileDescription')}
         </p>
         <Button
           onClick={onLoginRequired}
           className="bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] px-8 py-4 rounded-xl font-semibold transition-all hover:scale-105 shadow-lg shadow-[var(--shadow-primary)] animate-in zoom-in duration-500 delay-400"
         >
-          Sign in with Google
+          {t('profile:signInWithGoogle')}
         </Button>
       </div>
     )
@@ -228,8 +230,8 @@ export function Profile() {
   if (!isOwnProfile && !profile) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center">
-        <p className="text-[var(--color-text-tertiary)] mb-4">User not found</p>
-        <Button onClick={handleBack}>Go Back</Button>
+        <p className="text-[var(--color-text-tertiary)] mb-4">{t('profile:userNotFound')}</p>
+        <Button onClick={handleBack}>{t('profile:goBack')}</Button>
       </div>
     )
   }
@@ -253,11 +255,11 @@ export function Profile() {
       // Refresh profile data
       await refreshProfile()
 
-      toast.success('Avatar updated successfully')
+      toast.success(t('profile:avatarUpdateSuccess'))
       setShowAvatarPicker(false)
     } catch (err) {
       console.error('Error saving avatar:', err)
-      toast.error('Failed to save avatar. Please try again.')
+      toast.error(t('profile:avatarUpdateFailed'))
     } finally {
       setSaving(false)
     }
@@ -275,11 +277,11 @@ export function Profile() {
       // Refresh profile data
       await refreshProfile()
 
-      toast.success('Profile updated successfully')
+      toast.success(t('profile:updateSuccess'))
       setIsEditing(false)
     } catch (err) {
       console.error('Error saving name:', err)
-      toast.error('Failed to save name. Please try again.')
+      toast.error(t('profile:updateFailed'))
     } finally {
       setSaving(false)
     }
@@ -302,10 +304,10 @@ export function Profile() {
       // Refresh profile data
       await refreshProfile()
 
-      toast.success('Background updated successfully')
+      toast.success(t('profile:backgroundUpdateSuccess'))
     } catch (err) {
       console.error('Error saving background:', err)
-      toast.error('Failed to save background. Please try again.')
+      toast.error(t('profile:backgroundUpdateFailed'))
     } finally {
       setSaving(false)
     }
@@ -330,14 +332,14 @@ export function Profile() {
             className="mb-4 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card)]"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back
+            {t('profile:back')}
           </Button>
         )}
 
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[var(--color-text-primary)]">
-            {isOwnProfile ? 'My Profile' : profile?.full_name || 'User Profile'}
+            {isOwnProfile ? t('profile:myProfile') : profile?.full_name || t('profile:userProfile')}
           </h1>
         </div>
 
@@ -372,7 +374,7 @@ export function Profile() {
               <div className="mb-3">
                 {isOwnProfile && (
                   <label className="block text-xs font-medium text-[var(--color-text-tertiary)] mb-1">
-                    Display Name
+                    {t('profile:displayName')}
                   </label>
                 )}
                 {isOwnProfile && isEditing ? (
@@ -381,7 +383,7 @@ export function Profile() {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter your name"
+                      placeholder={t('profile:enterName')}
                       className="flex-1 w-full px-3 py-1.5 bg-[var(--color-bg-input)] border border-[var(--color-border-light)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-border-focus)] transition-colors"
                     />
                     <div className="flex gap-2">
@@ -414,7 +416,7 @@ export function Profile() {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <p className="text-lg font-bold text-[var(--color-text-primary)] truncate">
-                        {profile?.full_name || 'Anonymous User'}
+                        {profile?.full_name || t('follow:anonymousUser')}
                       </p>
                       {isOwnProfile && (
                         <Button
@@ -422,7 +424,7 @@ export function Profile() {
                           size="icon-sm"
                           onClick={() => setIsEditing(true)}
                           className="p-1 rounded-md hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-all sm:opacity-0 sm:group-hover/name:opacity-100"
-                          title="Edit name"
+                          title={t('profile:editName')}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </Button>
@@ -436,7 +438,7 @@ export function Profile() {
                         className="bg-gradient-to-r from-[#C0C0C0] via-[#FFD700] to-[#B9F2FF] hover:opacity-90 text-gray-900 font-semibold flex-shrink-0 w-full sm:w-auto"
                       >
                         <Crown className="w-4 h-4" />
-                        {profile?.plan ? 'Change Plan' : 'Upgrade to VIP'}
+                        {profile?.plan ? t('profile:changePlan') : t('profile:upgradeToVIP')}
                       </Button>
                     )}
                   </div>
@@ -447,7 +449,7 @@ export function Profile() {
               {isOwnProfile && (
                 <div className="mb-3">
                   <label className="block text-xs font-medium text-[var(--color-text-tertiary)] mb-1">
-                    Email
+                    {t('profile:email')}
                   </label>
                   <p className="text-sm text-[var(--color-text-secondary)] truncate">{user?.email}</p>
                 </div>
@@ -474,12 +476,12 @@ export function Profile() {
 
               {/* Voice Creator label for other user's profile */}
               {!isOwnProfile && !profile?.plan && (
-                <p className="text-sm text-[var(--color-text-tertiary)] mb-3">Voice Creator</p>
+                <p className="text-sm text-[var(--color-text-tertiary)] mb-3">{t('profile:voiceCreator')}</p>
               )}
 
               {/* Member Since */}
               <div className="text-xs text-[var(--color-text-muted)]">
-                Member since {formatDate(profile?.created_at || new Date().toISOString())}
+                {t('profile:memberSince')} {formatDate(profile?.created_at || new Date().toISOString())}
               </div>
 
               {/* Follow Button for other user's profile */}
@@ -488,7 +490,7 @@ export function Profile() {
                   {loadingFollowStatus ? (
                     <Button disabled size="sm">
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Loading...
+                      {t('profile:loading')}
                     </Button>
                   ) : isFollowing ? (
                     <Button
@@ -503,7 +505,7 @@ export function Profile() {
                       ) : (
                         <UserCheck className="w-4 h-4" />
                       )}
-                      Following
+                      {t('profile:following')}
                     </Button>
                   ) : (
                     <Button
@@ -517,7 +519,7 @@ export function Profile() {
                       ) : (
                         <UserPlus className="w-4 h-4" />
                       )}
-                      Follow
+                      {t('profile:follow')}
                     </Button>
                   )}
                 </div>
@@ -531,7 +533,7 @@ export function Profile() {
               <div className="text-xl font-bold text-[var(--color-text-primary)]">
                 {loadingRecordings ? '-' : recordings.length}
               </div>
-              <div className="text-xs text-[var(--color-text-tertiary)]">Recordings</div>
+              <div className="text-xs text-[var(--color-text-tertiary)]">{t('profile:recordings')}</div>
             </div>
             <div
               className="text-center cursor-pointer hover:bg-[var(--color-bg-elevated)] rounded-lg transition-colors p-2 -m-2"
@@ -543,7 +545,7 @@ export function Profile() {
               <div className="text-xl font-bold text-[var(--color-text-primary)]">
                 {loadingFollowStatus ? '-' : followersCount}
               </div>
-              <div className="text-xs text-[var(--color-text-tertiary)]">Followers</div>
+              <div className="text-xs text-[var(--color-text-tertiary)]">{t('profile:followers')}</div>
             </div>
             <div
               className="text-center cursor-pointer hover:bg-[var(--color-bg-elevated)] rounded-lg transition-colors p-2 -m-2"
@@ -555,7 +557,7 @@ export function Profile() {
               <div className="text-xl font-bold text-[var(--color-text-primary)]">
                 {loadingFollowStatus ? '-' : followingCount}
               </div>
-              <div className="text-xs text-[var(--color-text-tertiary)]">Following</div>
+              <div className="text-xs text-[var(--color-text-tertiary)]">{t('profile:following')}</div>
             </div>
           </div>
 
@@ -584,7 +586,7 @@ export function Profile() {
                   <div className="relative h-full flex items-center justify-center gap-2 z-10">
                     <Image className={`w-5 h-5 ${hasBackground ? 'text-white' : 'text-[var(--color-text-primary)]'}`} />
                     <span className={`font-medium ${hasBackground ? 'text-white' : 'text-[var(--color-text-primary)]'}`}>
-                      {hasBackground ? currentBackground.name : 'Choose Card Background'}
+                      {hasBackground ? currentBackground.name : t('profile:chooseBackground')}
                     </span>
                   </div>
                 </div>
@@ -598,7 +600,7 @@ export function Profile() {
           <div className="flex items-center gap-3 mb-4">
             <Mic className="w-5 h-5 text-[var(--color-accent-primary)]" />
             <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">
-              {isOwnProfile ? 'My Recordings' : 'Voice Recordings'}
+              {isOwnProfile ? t('profile:myRecordings') : t('profile:voiceRecordings')}
             </h2>
           </div>
 
@@ -614,12 +616,12 @@ export function Profile() {
                 </div>
               </div>
               <h3 className="text-lg font-semibold text-[var(--color-text-secondary)] mb-2">
-                No recordings yet
+                {t('profile:noRecordings')}
               </h3>
               <p className="text-[var(--color-text-tertiary)]">
                 {isOwnProfile
-                  ? 'Start recording to share your voice with the world!'
-                  : "This user hasn't shared any recordings yet"}
+                  ? t('profile:startRecording')
+                  : t('profile:noRecordingsOther')}
               </p>
             </div>
           ) : (

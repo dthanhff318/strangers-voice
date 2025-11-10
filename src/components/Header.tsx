@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +21,7 @@ interface HeaderProps {
 export function Header({ onLoginClick, onAdminClick }: HeaderProps) {
   const { user, profile, loading, signOut } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation(['header', 'common']);
 
   const handleSignOut = async () => {
     await signOut();
@@ -36,7 +38,7 @@ export function Header({ onLoginClick, onAdminClick }: HeaderProps) {
             <img src="/favicon.png" alt="" className="w-6 h-6 logo-invert" />
           </div>
           <span className="text-xl font-bold text-[var(--color-text-primary)]">
-            YMelody
+            {t('header:appName')}
           </span>
         </div>
 
@@ -53,7 +55,7 @@ export function Header({ onLoginClick, onAdminClick }: HeaderProps) {
                 <div className="absolute inset-0 w-2 h-2 bg-red-500 rounded-full animate-ping" />
               </div>
               <span className="text-[var(--color-text-primary)] text-sm font-medium">
-                Live
+                {t('header:live')}
               </span>
             </Button>
           )}
@@ -104,7 +106,7 @@ export function Header({ onLoginClick, onAdminClick }: HeaderProps) {
                     className="text-[var(--color-text-tertiary)] focus:bg-[var(--color-bg-elevated)] focus:text-[var(--color-text-primary)]"
                   >
                     <LayoutDashboard className="w-4 h-4" />
-                    <span>Dashboard</span>
+                    <span>{t('header:dashboard')}</span>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
@@ -112,7 +114,7 @@ export function Header({ onLoginClick, onAdminClick }: HeaderProps) {
                   className="text-[var(--color-text-tertiary)] focus:bg-[var(--color-bg-elevated)] focus:text-[var(--color-text-primary)]"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span>Sign out</span>
+                  <span>{t('header:signOut')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -122,7 +124,7 @@ export function Header({ onLoginClick, onAdminClick }: HeaderProps) {
               className="flex items-center gap-2 bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] px-4 py-2 rounded-lg transition-all font-medium"
             >
               <User className="w-4 h-4" />
-              <span>Sign in</span>
+              <span>{t('header:signIn')}</span>
             </Button>
           )}
         </div>

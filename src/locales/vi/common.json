@@ -1,0 +1,44 @@
+{
+  "app": {
+    "name": "YMelody",
+    "tagline": "Chia sẻ giọng nói của bạn với thế giới",
+    "loading": "Đang tải...",
+    "ready": "Sẵn sàng!",
+    "error": "Lỗi",
+    "success": "Thành công"
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "live": "Trực tiếp",
+    "profile": "Trang cá nhân",
+    "settings": "Cài đặt"
+  },
+  "actions": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "close": "Đóng",
+    "confirm": "Xác nhận",
+    "upload": "Tải lên",
+    "send": "Gửi",
+    "view": "Xem",
+    "share": "Chia sẻ",
+    "report": "Báo cáo",
+    "follow": "Theo dõi",
+    "unfollow": "Bỏ theo dõi",
+    "play": "Phát",
+    "pause": "Tạm dừng",
+    "record": "Ghi âm",
+    "stop": "Dừng"
+  },
+  "common": {
+    "yes": "Có",
+    "no": "Không",
+    "or": "hoặc",
+    "and": "và",
+    "welcome": "Chào mừng",
+    "logout": "Đăng xuất",
+    "login": "Đăng nhập"
+  }
+}

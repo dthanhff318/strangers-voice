@@ -10,7 +10,8 @@ export function useAudioStream(
   roomId: string,
   isHost: boolean,
   userId?: string,
-  onListenersCountChange?: (count: number) => void
+  onListenersCountChange?: (count: number) => void,
+  onHostDisconnect?: () => void
 ) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,18 +58,26 @@ export function useAudioStream(
         console.log("[HOOK] ➕ User joined:", newPresences);
       })
       .on("presence", { event: "leave" }, ({ leftPresences }) => {
-        console.log("[HOOK] ➖ User left:", leftPresences);
+        // Check if host disconnected
+        const hostLeft = leftPresences.some(
+          (presence: any) => presence.role === "host"
+        );
+
+        if (hostLeft) {
+          console.log("[HOOK] 🚨 Host disconnected!");
+          onHostDisconnect?.();
+        }
       });
 
     channelRef.current = channel;
     console.log("[HOOK] ✅ Channel created");
 
     return () => {
-      console.log("[HOOK] Cleaning up channel");
+      console.log("[HOOK] 🧹 Cleaning up channel");
       channel.unsubscribe();
       channelRef.current = null;
     };
-  }, [roomId, userId, onListenersCountChange]);
+  }, [roomId, userId, onListenersCountChange, onHostDisconnect]);
 
   // Start streaming (for host)
   const startStreaming = useCallback(async () => {
@@ -98,7 +107,10 @@ export function useAudioStream(
       if (channelRef.current && channelRef.current.state !== "joined") {
         console.log("[HOOK] Subscribing to channel...");
         await channelRef.current.subscribe();
-        console.log("[HOOK] ✅ Channel subscribed, state:", channelRef.current.state);
+        console.log(
+          "[HOOK] ✅ Channel subscribed, state:",
+          channelRef.current.state
+        );
       }
 
       // Track presence as host
@@ -164,7 +176,10 @@ export function useAudioStream(
       if (channelRef.current && channelRef.current.state !== "joined") {
         console.log("[HOOK] Subscribing to channel...");
         await channelRef.current.subscribe();
-        console.log("[HOOK] ✅ Channel subscribed, state:", channelRef.current.state);
+        console.log(
+          "[HOOK] ✅ Channel subscribed, state:",
+          channelRef.current.state
+        );
       }
 
       // Track presence as listener

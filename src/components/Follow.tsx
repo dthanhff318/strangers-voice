@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "../lib/supabase";
 import { getRecommendedUsers } from "../lib/edgeFunctions";
 import { Search, Users, Loader2, Mic } from "lucide-react";
@@ -20,6 +21,7 @@ interface UserProfile {
 
 export function Follow() {
   const { user } = useAuth();
+  const { t } = useTranslation(['follow', 'common']);
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [recommendedUsers, setRecommendedUsers] = useState<UserProfile[]>([]);
@@ -140,11 +142,11 @@ export function Follow() {
         <div className="flex items-center gap-3 mb-3">
           <div className="w-1 h-8 bg-[var(--color-accent-primary)] rounded-full" />
           <h1 className="text-4xl font-bold text-[var(--color-text-primary)]">
-            Discover Voices
+            {t('follow:title')}
           </h1>
         </div>
         <p className="text-[var(--color-text-tertiary)] text-lg ml-4">
-          Find and connect with voice creators
+          {t('follow:subtitle')}
         </p>
       </div>
 
@@ -156,7 +158,7 @@ export function Follow() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search users by name..."
+            placeholder={t('follow:searchPlaceholder')}
             className="w-full pl-12 pr-4 py-4 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-border-focus)] transition-colors"
           />
           {loading && (
@@ -173,7 +175,7 @@ export function Follow() {
             <div className="flex items-center gap-2 mb-4">
               <Users className="w-5 h-5 text-[var(--color-accent-primary)]" />
               <h2 className="text-xl font-bold text-[var(--color-text-primary)]">
-                Recommended Users
+                {t('follow:recommendedUsers')}
               </h2>
             </div>
 
@@ -185,7 +187,7 @@ export function Follow() {
               <div className="text-center py-12 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]">
                 <Users className="w-12 h-12 mx-auto mb-3 text-[var(--color-text-tertiary)]" />
                 <p className="text-[var(--color-text-tertiary)]">
-                  No users available yet
+                  {t('follow:noUsersAvailable')}
                 </p>
               </div>
             ) : (
@@ -214,7 +216,7 @@ export function Follow() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1 mb-1">
                           <h3 className="font-semibold text-[var(--color-text-primary)] text-lg truncate">
-                            {userProfile.full_name || "Anonymous User"}
+                            {userProfile.full_name || t('follow:anonymousUser')}
                           </h3>
                           <PlanBadge plan={userProfile.plan} size={16} />
                         </div>
@@ -222,8 +224,8 @@ export function Follow() {
                           <Mic className="w-3.5 h-3.5" />
                           <span>
                             {recordingsCounts[userProfile.id] !== undefined
-                              ? `${recordingsCounts[userProfile.id]} recordings`
-                              : "Loading..."}
+                              ? `${recordingsCounts[userProfile.id]} ${t('follow:recordings')}`
+                              : t('follow:loading')}
                           </span>
                         </div>
                       </div>
@@ -238,10 +240,10 @@ export function Follow() {
           <div className="text-center py-12 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]">
             <Search className="w-12 h-12 mx-auto mb-3 text-[var(--color-text-tertiary)]" />
             <h3 className="text-lg font-semibold text-[var(--color-text-secondary)] mb-1">
-              Search for more users
+              {t('follow:searchForMore')}
             </h3>
             <p className="text-sm text-[var(--color-text-tertiary)]">
-              Type a name to find specific voice creators
+              {t('follow:searchForMoreDescription')}
             </p>
           </div>
         </div>
@@ -251,10 +253,10 @@ export function Follow() {
             <Users className="w-10 h-10 text-[var(--color-text-tertiary)]" />
           </div>
           <h3 className="text-xl font-semibold text-[var(--color-text-secondary)] mb-2">
-            No users found
+            {t('follow:noUsersFound')}
           </h3>
           <p className="text-[var(--color-text-tertiary)]">
-            Try searching with a different name
+            {t('follow:tryDifferentName')}
           </p>
         </div>
       ) : (
@@ -283,7 +285,7 @@ export function Follow() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1 mb-1">
                     <h3 className="font-semibold text-[var(--color-text-primary)] text-lg truncate">
-                      {userProfile.full_name || "Anonymous User"}
+                      {userProfile.full_name || t('follow:anonymousUser')}
                     </h3>
                     <PlanBadge plan={userProfile.plan} size={16} />
                   </div>
@@ -291,8 +293,8 @@ export function Follow() {
                     <Mic className="w-3.5 h-3.5" />
                     <span>
                       {recordingsCounts[userProfile.id] !== undefined
-                        ? `${recordingsCounts[userProfile.id]} recordings`
-                        : "Loading..."}
+                        ? `${recordingsCounts[userProfile.id]} ${t('follow:recordings')}`
+                        : t('follow:loading')}
                     </span>
                   </div>
                 </div>

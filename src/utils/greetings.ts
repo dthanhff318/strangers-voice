@@ -1,6 +1,25 @@
 /**
- * Get a random time-based greeting message
- * Returns different greetings based on time of day with variety
+ * Get time of day period
+ * Returns 'morning', 'afternoon', 'evening', or 'night'
+ */
+export function getTimeOfDay(): 'morning' | 'afternoon' | 'evening' | 'night' {
+  const hour = new Date().getHours();
+
+  if (hour >= 5 && hour < 12) {
+    return 'morning';
+  } else if (hour >= 12 && hour < 17) {
+    return 'afternoon';
+  } else if (hour >= 17 && hour < 21) {
+    return 'evening';
+  } else {
+    return 'night';
+  }
+}
+
+/**
+ * Get a random time-based greeting message (English only, deprecated)
+ * Use getTimeOfDay() with i18n instead
+ * @deprecated Use getTimeOfDay() with i18n translations
  */
 export function getTimeBasedGreeting(): string {
   const hour = new Date().getHours();

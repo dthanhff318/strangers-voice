@@ -1,0 +1,15 @@
+{
+  "title": "Discover Voices",
+  "subtitle": "Find and connect with voice creators",
+  "searchPlaceholder": "Search users by name...",
+  "recommendedUsers": "Recommended Users",
+  "searchForMore": "Search for more users",
+  "searchForMoreDescription": "Type a name to find specific voice creators",
+  "noUsersAvailable": "No users available yet",
+  "noUsersFound": "No users found",
+  "tryDifferentName": "Try searching with a different name",
+  "anonymousUser": "Anonymous User",
+  "recordings": "recordings",
+  "recording": "recording",
+  "loading": "Loading..."
+}

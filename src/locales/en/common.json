@@ -1,0 +1,44 @@
+{
+  "app": {
+    "name": "YMelody",
+    "tagline": "Share your voice with the world",
+    "loading": "Loading...",
+    "ready": "Ready!",
+    "error": "Error",
+    "success": "Success"
+  },
+  "nav": {
+    "home": "Home",
+    "live": "Live",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "upload": "Upload",
+    "send": "Send",
+    "view": "View",
+    "share": "Share",
+    "report": "Report",
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "play": "Play",
+    "pause": "Pause",
+    "record": "Record",
+    "stop": "Stop"
+  },
+  "common": {
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "and": "and",
+    "welcome": "Welcome",
+    "logout": "Logout",
+    "login": "Login"
+  }
+}

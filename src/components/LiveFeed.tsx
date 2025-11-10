@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLiveRooms } from '../hooks/useLiveRoom'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from './ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { CreateLiveRoomModal } from './CreateLiveRoomModal'
@@ -21,6 +22,7 @@ import {
 } from './ui/alert-dialog'
 
 export function LiveFeed() {
+  const { t } = useTranslation(['live', 'common'])
   const { rooms, loading, error } = useLiveRooms()
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -89,7 +91,7 @@ export function LiveFeed() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[50vh]">
-        <Loading variant="ring" size={48} label="Loading live rooms..." />
+        <Loading variant="ring" size={48} label={t('live:loading')} />
       </div>
     )
   }
@@ -108,8 +110,8 @@ export function LiveFeed() {
                 </div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">Live Rooms</h1>
-                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Listen to live conversations</p>
+                <h1 className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">{t('live:title')}</h1>
+                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{t('live:subtitle')}</p>
               </div>
             </div>
             {user && (
@@ -125,7 +127,7 @@ export function LiveFeed() {
                 ) : (
                   <Plus className="w-5 h-5" />
                 )}
-                {activeRoomId ? 'Return to Your Live' : 'Go Live'}
+                {activeRoomId ? t('live:returnToLive') : t('live:goLive')}
               </Button>
             )}
           </div>
@@ -147,10 +149,10 @@ export function LiveFeed() {
             </div>
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
-                No Live Rooms Right Now
+                {t('live:noRooms')}
               </h3>
               <p className="text-[var(--color-text-secondary)]">
-                {user ? 'Be the first to start a live session!' : 'Sign in to create a live room'}
+                {user ? t('live:beTheFirst') : t('live:signInToCreate')}
               </p>
             </div>
           </div>
@@ -188,7 +190,7 @@ export function LiveFeed() {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-xs text-[var(--color-text-muted)] mb-0.5">Hosted by</p>
+                    <p className="text-xs text-[var(--color-text-muted)] mb-0.5">{t('live:hostedBy')}</p>
                     <p className="font-medium text-[var(--color-text-primary)]">
                       {room.host?.full_name || 'Anonymous'}
                     </p>
@@ -216,7 +218,7 @@ export function LiveFeed() {
                     }}
                     className="w-full bg-[var(--color-accent)] hover:bg-[var(--color-accent)]/90 text-white"
                   >
-                    Join & Listen
+                    {t('live:joinAndListen')}
                   </Button>
                 </div>
               </div>
@@ -234,21 +236,21 @@ export function LiveFeed() {
         <AlertDialogContent className="bg-[var(--color-bg-card)] border-[var(--color-border)]">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-[var(--color-text-primary)]">
-              You Already Have an Active Live Room
+              {t('live:activeRoomAlertTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[var(--color-text-secondary)]">
-              You can only have one active live room at a time. Would you like to go to your current live room?
+              {t('live:activeRoomAlertDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] border-[var(--color-border)]">
-              Cancel
+              {t('common:actions.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleGoToActiveRoom}
               className="bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)]"
             >
-              Go to Live Room
+              {t('live:goToLiveRoom')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

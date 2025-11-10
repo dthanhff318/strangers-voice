@@ -1,0 +1,43 @@
+{
+  "title": "Settings",
+  "appearance": {
+    "title": "Appearance",
+    "theme": "Theme",
+    "themeDescription": "Currently using {{theme}} theme",
+    "dark": "dark",
+    "light": "light"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "push": "Push Notifications",
+    "pushDescription": "Receive notifications for new activity",
+    "email": "Email Notifications",
+    "emailDescription": "Receive email updates"
+  },
+  "privacy": {
+    "title": "Privacy & Security",
+    "privateProfile": "Private Profile",
+    "privateProfileDescription": "Only followers can see your recordings"
+  },
+  "language": {
+    "title": "Language & Region",
+    "language": "Language",
+    "languageDescription": "Select your preferred language",
+    "selectLanguage": "Select language",
+    "languages": {
+      "en": "English",
+      "vi": "Tiếng Việt"
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "supportEmail": "Support Email",
+    "supportEmailDescription": "Get in touch with us"
+  },
+  "about": {
+    "title": "About",
+    "version": "Version",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy"
+  }
+}

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "../lib/supabase";
 import { getTrendingRecordsDashboard } from "../lib/edgeFunctions";
 import { AudioCard } from "./AudioCard";
@@ -7,7 +8,7 @@ import { Loading } from "./Loading";
 import { Sparkles } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useLoginRequired } from "../App";
-import { getTimeBasedGreeting } from "../utils/greetings";
+import { getTimeOfDay } from "../utils/greetings";
 
 interface Recording {
   id: string;
@@ -31,6 +32,7 @@ export function Feed() {
   const queryClient = useQueryClient();
   const { profile } = useAuth();
   const { onLoginRequired } = useLoginRequired();
+  const { t } = useTranslation(['feed', 'common']);
 
   // Use React Query for data fetching with caching
   const {
@@ -72,7 +74,7 @@ export function Feed() {
   if (error) {
     return (
       <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] text-[var(--color-text-primary)] px-4 py-3 rounded-lg">
-        {error instanceof Error ? error.message : "Failed to load recordings"}
+        {error instanceof Error ? error.message : t('feed:error')}
       </div>
     );
   }
@@ -82,7 +84,8 @@ export function Feed() {
     queryClient.invalidateQueries({ queryKey: ["trending-recordings"] });
   };
 
-  const greeting = getTimeBasedGreeting();
+  const timeOfDay = getTimeOfDay();
+  const greeting = t(`feed:greetings.${timeOfDay}`);
   const displayName = profile?.full_name ? `, ${profile.full_name}` : "";
 
   return (
@@ -106,7 +109,7 @@ export function Feed() {
         <Loading
           variant="ring"
           size={48}
-          label="Loading recordings..."
+          label={t('feed:loading')}
           className="py-12"
         />
       ) : recordings.length === 0 ? (
@@ -122,10 +125,10 @@ export function Feed() {
             </div>
           </div>
           <h3 className="text-xl font-semibold text-[var(--color-text-secondary)] mb-2">
-            No recordings yet
+            {t('feed:noRecordings')}
           </h3>
           <p className="text-[var(--color-text-tertiary)]">
-            Be the first to record something!
+            {t('feed:beTheFirst')}
           </p>
         </div>
       ) : (

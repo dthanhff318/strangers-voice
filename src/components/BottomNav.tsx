@@ -1,4 +1,5 @@
 import { Home, Users, Mic, User, Settings } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
 
 type NavTab = "home" | "follow" | "profile" | "settings" | "admin";
@@ -14,6 +15,8 @@ export function BottomNav({
   onTabChange,
   onRecordClick,
 }: BottomNavProps) {
+  const { t } = useTranslation(['nav']);
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50">
       {/* Gradient overlay */}
@@ -47,7 +50,7 @@ export function BottomNav({
                     : "opacity-70 group-hover:opacity-100"
                 }`}
               >
-                Home
+                {t('nav:home')}
               </span>
             </Button>
 
@@ -75,7 +78,7 @@ export function BottomNav({
                     : "opacity-70 group-hover:opacity-100"
                 }`}
               >
-                Follow
+                {t('nav:follow')}
               </span>
             </Button>
 
@@ -98,7 +101,7 @@ export function BottomNav({
                 </div>
               </div>
               <span className="text-xs font-medium text-[var(--color-text-primary)] mt-1 group-hover:scale-105 transition-transform duration-300">
-                Record
+                {t('nav:record')}
               </span>
             </Button>
 
@@ -126,7 +129,7 @@ export function BottomNav({
                     : "opacity-70 group-hover:opacity-100"
                 }`}
               >
-                Profile
+                {t('nav:profile')}
               </span>
             </Button>
 
@@ -154,7 +157,7 @@ export function BottomNav({
                     : "opacity-70 group-hover:opacity-100"
                 }`}
               >
-                Settings
+                {t('nav:settings')}
               </span>
             </Button>
           </div>
