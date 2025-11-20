@@ -27,22 +27,25 @@ export function PwaInstallPrompt() {
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
     setIsIos(ios);
 
+    // Detect mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
     // Check if user has dismissed the prompt before
     const dismissed = localStorage.getItem('pwa-install-dismissed');
 
-    // For iOS, show prompt if not standalone and not dismissed
-    if (ios && !isStandaloneMode && !dismissed) {
+    // For all mobile devices, show prompt if not standalone and not dismissed
+    if (isMobile && !isStandaloneMode && !dismissed) {
       setShowPrompt(true);
-      return;
     }
 
-    // For other browsers, listen for beforeinstallprompt event
+    // For Android browsers, listen for beforeinstallprompt event to enable native install
     const handler = (e: Event) => {
       e.preventDefault();
       const promptEvent = e as BeforeInstallPromptEvent;
       setDeferredPrompt(promptEvent);
 
-      if (!dismissed) {
+      // Update prompt if not already showing
+      if (!dismissed && !isStandaloneMode) {
         setShowPrompt(true);
       }
     };
