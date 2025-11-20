@@ -29,12 +29,9 @@ export function PwaInstallPrompt() {
 
     // Check if user has dismissed the prompt before
     const dismissed = localStorage.getItem('pwa-install-dismissed');
-    const dismissedTime = dismissed ? parseInt(dismissed) : 0;
-    const sevenDays = 7 * 24 * 60 * 60 * 1000;
-    const shouldShow = !dismissed || (Date.now() - dismissedTime > sevenDays);
 
     // For iOS, show prompt if not standalone and not dismissed
-    if (ios && !isStandaloneMode && shouldShow) {
+    if (ios && !isStandaloneMode && !dismissed) {
       setShowPrompt(true);
       return;
     }
@@ -45,7 +42,7 @@ export function PwaInstallPrompt() {
       const promptEvent = e as BeforeInstallPromptEvent;
       setDeferredPrompt(promptEvent);
 
-      if (shouldShow) {
+      if (!dismissed) {
         setShowPrompt(true);
       }
     };
@@ -64,11 +61,7 @@ export function PwaInstallPrompt() {
     await deferredPrompt.prompt();
 
     // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    }
+    await deferredPrompt.userChoice;
 
     // Clear the prompt
     setDeferredPrompt(null);
@@ -77,7 +70,7 @@ export function PwaInstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+    localStorage.setItem('pwa-install-dismissed', 'true');
   };
 
   // Don't show if already installed or dismissed
