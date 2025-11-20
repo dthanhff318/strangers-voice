@@ -110,7 +110,7 @@ export function PwaInstallPrompt() {
                 <Share className="w-4 h-4" />
                 <span>{t('pwa.installIos')}</span>
               </div>
-            ) : (
+            ) : deferredPrompt ? (
               <div className="flex gap-2 flex-wrap">
                 <Button
                   onClick={handleInstallClick}
@@ -120,6 +120,20 @@ export function PwaInstallPrompt() {
                   <Download className="w-4 h-4 mr-1" />
                   {t('pwa.installButton')}
                 </Button>
+                <Button
+                  onClick={handleDismiss}
+                  size="sm"
+                  variant="outline"
+                  className="text-purple-600 dark:text-purple-300 border-purple-300 dark:border-purple-600 hover:bg-purple-100 dark:hover:bg-purple-800/50"
+                >
+                  {t('pwa.installLater')}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <div className="text-xs text-purple-600 dark:text-purple-300 bg-white/50 dark:bg-purple-800/30 px-3 py-2 rounded-lg">
+                  {t('pwa.installAndroid', 'Tap menu (⋮) → Add to Home screen')}
+                </div>
                 <Button
                   onClick={handleDismiss}
                   size="sm"

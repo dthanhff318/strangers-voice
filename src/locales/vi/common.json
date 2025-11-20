@@ -12,7 +12,8 @@
     "installDescription": "Cài đặt ứng dụng để có trải nghiệm tốt hơn! Truy cập nhanh và hỗ trợ offline.",
     "installButton": "Cài đặt",
     "installLater": "Để sau",
-    "installIos": "Để cài đặt: Nhấn Chia sẻ → Thêm vào Màn hình chính"
+    "installIos": "Để cài đặt: Nhấn Chia sẻ → Thêm vào Màn hình chính",
+    "installAndroid": "Nhấn menu (⋮) → Thêm vào Màn hình chính"
   },
   "nav": {
     "home": "Trang chủ",

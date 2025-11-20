@@ -12,7 +12,8 @@
     "installDescription": "Install the app for a better experience! Quick access and offline support.",
     "installButton": "Install",
     "installLater": "Maybe later",
-    "installIos": "To install: Tap Share → Add to Home Screen"
+    "installIos": "To install: Tap Share → Add to Home Screen",
+    "installAndroid": "Tap menu (⋮) → Add to Home screen"
   },
   "nav": {
     "home": "Home",
