@@ -5,6 +5,7 @@ import { supabase } from "../lib/supabase";
 import { getTrendingRecordsDashboard } from "../lib/edgeFunctions";
 import { AudioCard } from "./AudioCard";
 import { Loading } from "./Loading";
+import { PwaInstallPrompt } from "./PwaInstallPrompt";
 import { Sparkles } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useLoginRequired } from "../App";
@@ -103,6 +104,9 @@ export function Feed() {
           </div>
         </div>
       </div>
+
+      {/* PWA Install Prompt */}
+      <PwaInstallPrompt />
 
       {/* Loading State */}
       {isLoadingRecordings ? (

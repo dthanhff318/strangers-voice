@@ -7,6 +7,13 @@
     "error": "Error",
     "success": "Success"
   },
+  "pwa": {
+    "installTitle": "Install YMelody",
+    "installDescription": "Install the app for a better experience! Quick access and offline support.",
+    "installButton": "Install",
+    "installLater": "Maybe later",
+    "installIos": "To install: Tap Share → Add to Home Screen"
+  },
   "nav": {
     "home": "Home",
     "live": "Live",
