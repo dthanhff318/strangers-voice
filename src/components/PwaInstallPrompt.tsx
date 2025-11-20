@@ -30,8 +30,8 @@ export function PwaInstallPrompt() {
     // Detect mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    // Check if user has dismissed the prompt before
-    const dismissed = localStorage.getItem('pwa-install-dismissed');
+    // Check if user has dismissed the prompt in this session
+    const dismissed = sessionStorage.getItem('pwa-install-dismissed');
 
     // For all mobile devices, show prompt if not standalone and not dismissed
     if (isMobile && !isStandaloneMode && !dismissed) {
@@ -73,7 +73,7 @@ export function PwaInstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('pwa-install-dismissed', 'true');
+    sessionStorage.setItem('pwa-install-dismissed', 'true');
   };
 
   // Don't show if already installed or dismissed
