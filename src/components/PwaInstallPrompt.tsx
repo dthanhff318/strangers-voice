@@ -16,10 +16,17 @@ export function PwaInstallPrompt() {
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
-    // Check if running as standalone app
-    const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches
-      || (window.navigator as any).standalone
-      || document.referrer.includes('android-app://');
+    // Check if running as standalone app (PWA installed)
+    const isStandaloneMode =
+      // Standard PWA check
+      window.matchMedia('(display-mode: standalone)').matches ||
+      // iOS Safari
+      (window.navigator as any).standalone === true ||
+      // Android Chrome - check if opened from home screen
+      document.referrer.includes('android-app://') ||
+      // Additional checks for different display modes
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches;
 
     setIsStandalone(isStandaloneMode);
 
@@ -33,8 +40,11 @@ export function PwaInstallPrompt() {
     // Check if user has dismissed the prompt in this session
     const dismissed = sessionStorage.getItem('pwa-install-dismissed');
 
-    // For all mobile devices, show prompt if not standalone and not dismissed
-    if (isMobile && !isStandaloneMode && !dismissed) {
+    // Check if user has previously installed (stored in localStorage)
+    const hasInstalled = localStorage.getItem('pwa-installed') === 'true';
+
+    // For all mobile devices, show prompt if not standalone, not installed, and not dismissed
+    if (isMobile && !isStandaloneMode && !hasInstalled && !dismissed) {
       setShowPrompt(true);
     }
 
@@ -45,15 +55,24 @@ export function PwaInstallPrompt() {
       setDeferredPrompt(promptEvent);
 
       // Update prompt if not already showing
-      if (!dismissed && !isStandaloneMode) {
+      if (!dismissed && !isStandaloneMode && !hasInstalled) {
         setShowPrompt(true);
       }
     };
 
+    // Listen for successful app installation
+    const installedHandler = () => {
+      localStorage.setItem('pwa-installed', 'true');
+      setShowPrompt(false);
+      setIsStandalone(true);
+    };
+
     window.addEventListener('beforeinstallprompt', handler);
+    window.addEventListener('appinstalled', installedHandler);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', installedHandler);
     };
   }, []);
 
