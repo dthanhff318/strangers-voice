@@ -1,5 +1,11 @@
 {
   "title": "Settings",
+  "pwaInstall": {
+    "title": "Install App",
+    "description": "Install this app on your device for a better experience",
+    "installed": "App is already installed",
+    "notAvailable": "Installation not available on this device"
+  },
   "appearance": {
     "title": "Appearance",
     "theme": "Theme",

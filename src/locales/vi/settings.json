@@ -1,5 +1,11 @@
 {
   "title": "Cài đặt",
+  "pwaInstall": {
+    "title": "Cài đặt ứng dụng",
+    "description": "Cài đặt ứng dụng này trên thiết bị của bạn để có trải nghiệm tốt hơn",
+    "installed": "Ứng dụng đã được cài đặt",
+    "notAvailable": "Không thể cài đặt trên thiết bị này"
+  },
   "appearance": {
     "title": "Giao diện",
     "theme": "Chủ đề",

@@ -102,30 +102,30 @@ export function PwaInstallPrompt() {
 
   return (
     <div className="w-full animate-in fade-in slide-in-from-top-3 duration-500">
-      <div className="relative bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl shadow-md border border-purple-200 dark:border-purple-700 p-4">
+      <div className="relative bg-[var(--color-bg-card)] rounded-xl shadow-md border border-[var(--color-border)] p-4">
         <button
           onClick={handleDismiss}
-          className="absolute top-3 right-3 p-1 text-purple-400 hover:text-purple-600 dark:hover:text-purple-300 transition-colors rounded-full hover:bg-purple-100 dark:hover:bg-purple-800/50"
+          className="absolute top-3 right-3 p-1 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors rounded-full hover:bg-[var(--color-accent-hover)]"
           aria-label="Close"
         >
           <X className="w-4 h-4" />
         </button>
 
         <div className="flex items-start gap-4 pr-8">
-          <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-md">
-            <Download className="w-6 h-6 text-white" />
+          <div className="flex-shrink-0 w-12 h-12 bg-[var(--color-btn-primary)] rounded-xl flex items-center justify-center shadow-md">
+            <Download className="w-6 h-6 text-[var(--color-btn-primary-text)]" />
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-purple-900 dark:text-purple-100 mb-1">
+            <h3 className="text-base font-semibold text-[var(--color-text-primary)] mb-1">
               {t('pwa.installTitle')}
             </h3>
-            <p className="text-sm text-purple-700 dark:text-purple-200 mb-3">
+            <p className="text-sm text-[var(--color-text-secondary)] mb-3">
               {isIos ? t('pwa.installIos') : t('pwa.installDescription')}
             </p>
 
             {isIos ? (
-              <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-300 bg-white/50 dark:bg-purple-800/30 px-3 py-2 rounded-lg">
+              <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] px-3 py-2 rounded-lg">
                 <Share className="w-4 h-4" />
                 <span>{t('pwa.installIos')}</span>
               </div>
@@ -134,7 +134,7 @@ export function PwaInstallPrompt() {
                 <Button
                   onClick={handleInstallClick}
                   size="sm"
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-md"
+                  className="bg-[var(--color-btn-primary)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)] shadow-md"
                 >
                   <Download className="w-4 h-4 mr-1" />
                   {t('pwa.installButton')}
@@ -143,21 +143,21 @@ export function PwaInstallPrompt() {
                   onClick={handleDismiss}
                   size="sm"
                   variant="outline"
-                  className="text-purple-600 dark:text-purple-300 border-purple-300 dark:border-purple-600 hover:bg-purple-100 dark:hover:bg-purple-800/50"
+                  className="text-[var(--color-text-primary)] border-[var(--color-border)] hover:bg-[var(--color-bg-card-hover)]"
                 >
                   {t('pwa.installLater')}
                 </Button>
               </div>
             ) : (
               <div className="flex flex-col gap-2">
-                <div className="text-xs text-purple-600 dark:text-purple-300 bg-white/50 dark:bg-purple-800/30 px-3 py-2 rounded-lg">
+                <div className="text-xs text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] px-3 py-2 rounded-lg">
                   {t('pwa.installAndroid', 'Tap menu (⋮) → Add to Home screen')}
                 </div>
                 <Button
                   onClick={handleDismiss}
                   size="sm"
                   variant="outline"
-                  className="text-purple-600 dark:text-purple-300 border-purple-300 dark:border-purple-600 hover:bg-purple-100 dark:hover:bg-purple-800/50"
+                  className="text-[var(--color-text-primary)] border-[var(--color-border)] hover:bg-[var(--color-bg-card-hover)]"
                 >
                   {t('pwa.installLater')}
                 </Button>
